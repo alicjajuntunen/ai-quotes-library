@@ -19,6 +19,9 @@
 > "I talk about me dictating a painting over the phone. It's very, very hard... If there's a color that I want to put in my design, the color wheel will never be replaced by a prompt."
 > — [[Loredana Crisan - Figma's big bets for the future of AI design]]
 
+> "This is what AI is actually really, really good at: Robot Monkey work. Freeing designers to do what actual humans do best. Human work. Empathy. Story. Communication. Invention. Innovation."
+> — [[UX for AI - Shorthand UX Design Notation as AI Prompt]]
+
 
 ## The last mile is ours
 
@@ -45,6 +48,9 @@
 
 > "AI gives me a level of precision that I've never had in my career and yet we always are quick to say like well AI slaps... I'm making micro decisions that I didn't have a grid for a year ago."
 > — [[Tommy Geoco - The state of the design industry right now]]
+
+> "The AI becomes a little bit more of a collaborator rather than just a generator of outputs."
+> — [[Addy Osmani - The AI-Assisted Developer Workflow (JSNation US 2024)]]
 
 
 ## When everyone can build, judgment wins
@@ -85,6 +91,9 @@
 > "A trap with jumping into code is we can get into execution mode too quickly... because there's this pressure to show things that are in code, we end up just skipping a pretty good touchpoint where it's like, no, no, no, let's go wide."
 > — [[I'm (finally) showing how I design with AI]]
 
+> "It's better to go slow in the right direction."
+> — [[Addy Osmani - The AI-Assisted Developer Workflow (JSNation US 2024)]]
+
 
 ## The job is being remade
 
@@ -117,3 +126,54 @@
 
 > "I think the future is bright, but it has to be built."
 > — [[Tommy Geoco - The state of the design industry right now]]
+
+> "One of the greatest skills that you can acquire is to be able to reduce the gap from idea to execution."
+> — [[Addy Osmani - The AI-Assisted Developer Workflow (JSNation US 2024)]]
+
+> "The time to begin isn't when everything becomes clear - it's now, while everything is still messy and uncertain. The advantage goes to those willing to learn fastest."
+> — [[One Useful Thing - Making AI Work in Practice]]
+
+
+## Powerful tools, unreliable hands
+
+> "LLMs are power-user tools—they're chainsaws disguised as kitchen knives."
+> — [[Simon Willison - Things we learned about LLMs in 2024]]
+
+> "The key skill in getting the most out of LLMs is learning to work with tech that is both inherently unreliable and incredibly powerful at the same time."
+> — [[Simon Willison - Things we learned about LLMs in 2024]]
+
+
+## Augment, don't replace
+
+> "They fell into what I call the "replacement trap"—viewing AI and humans as interchangeable rather than complementary."
+> — [[Groktop - Duolingo's AI-First Disaster]]
+
+> "The question isn't whether AI will transform your workforce—it's whether you'll use it as a sledgehammer to break down what you've built, or as a sophisticated tool to enhance what makes your people exceptional."
+> — [[Groktop - Duolingo's AI-First Disaster]]
+
+
+## Shifting, not collapsing
+
+> "AI search does not change the goal of helping users. It raises the standard for coherence, accuracy, and trust across the entire web."
+> — [[Search Engine Land - What is Generative Engine Optimization (GEO)]]
+
+> "Turns out, the sky isn't falling – it's shifting."
+> — [[Siege Media - SEO Impact of AI Overviews]]
+
+
+## Quiet AI beats the magic text box
+
+> "Perhaps the best AI in 2025 is "quiet" — without any sparkles or chatbots. It just sits behind a humble button or runs in the background, doing the tedious job that users had to slowly do in the past. It shines when it fixes actual problems that it has, not when it screams for attention that it doesn't deserve."
+> — [[Designing AI Interfaces (Notion)]]
+
+> "The issue isn't the lack of design skills or implementation hurdles: it's the product-market-fit gap that is often overlooked or dismissed in favor of a super-intelligent text box."
+> — [[Designing AI Interfaces (Notion)]]
+
+> "Probably one of the most underrated yet impactful design patterns for AI interfaces is the ability to tune AI experience. This could show itself as a style lenses or temperature knobs — little tools to help users request a personalized output easier."
+> — [[AI Interaction Design Patterns (Notion)]]
+
+
+## Once it works, it's just software
+
+> "Hence the old joke that AI is whatever doesn't work yet, because once it works it's just software."
+> — [[Benedict Evans - Building AI Products]]

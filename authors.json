@@ -1,0 +1,300 @@
+{
+  "AI Design Patterns and UX Toolkits (Notion)": {
+    "author": "Vitaly Friedman"
+  },
+  "AI Interaction Design Patterns (Notion)": {
+    "author": "Vitaly Friedman"
+  },
+  "AI Snake Oil - AI Companies Are Pivoting From Creating Gods to Building Products": {
+    "author": "Arvind Narayanan & Sayash Kapoor",
+    "role": "Authors, AI Snake Oil"
+  },
+  "AI Snake Oil - Is AI Progress Slowing Down": {
+    "author": "Arvind Narayanan & Sayash Kapoor",
+    "role": "Authors, AI Snake Oil"
+  },
+  "Addy Osmani - The AI-Assisted Developer Workflow (JSNation US 2024)": {
+    "author": "Addy Osmani",
+    "role": "Engineering Lead, Google"
+  },
+  "An AI state of the union - We've passed the inflection point & dark factories are coming": {
+    "author": "Simon Willison",
+    "role": "Creator, Datasette; Co-creator, Django"
+  },
+  "Andy Madrick - Why AI changed design handoff forever": {
+    "author": "Andy Madrick",
+    "role": "Product Designer, Notion"
+  },
+  "Anthropic - Claude 4 System Prompt": {
+    "author": "Anthropic"
+  },
+  "Anthropic - Claude Code Best Practices": {
+    "author": "Anthropic"
+  },
+  "Anthropic - Prompt Library": {
+    "author": "Anthropic"
+  },
+  "Antonio Gulli - AI Design, A Beginners Guide to Building Intelligence Through Patterns": {
+    "author": "Antonio Gulli",
+    "role": "Senior Director, Google"
+  },
+  "Artfish AI - Evaluating Long Context LLMs": {
+    "author": "Yennie Jun"
+  },
+  "Awesome ChatGPT Prompts": {
+    "author": "Fatih Kadir Akın"
+  },
+  "Benedict Evans - Building AI Products": {
+    "author": "Benedict Evans",
+    "role": "Independent Analyst"
+  },
+  "Big Medium - Sentient Design, AI and the Next Chapter of UX (Josh Clark)": {
+    "author": "Josh Clark",
+    "role": "Principal, Big Medium"
+  },
+  "Brett Williams - How a Visual Designer Became a Builder": {
+    "author": "Brett Williams",
+    "role": "Founder, Designjoy"
+  },
+  "Caitlin Kalinowski - Why the next AI boom is physical AI": {
+    "author": "Caitlin Kalinowski",
+    "role": "Head of Robotics (ex), OpenAI"
+  },
+  "Cat Wu - How Anthropic's product team moves faster than anyone else": {
+    "author": "Cat Wu",
+    "role": "Head of Product, Claude Code (Anthropic)"
+  },
+  "Claire Vo - From skeptic to true believer - How OpenClaw changed my life": {
+    "author": "Claire Vo",
+    "role": "Founder, ChatPRD; CPO, LaunchDarkly"
+  },
+  "Dan Shipper - AI predictions - Job markets, Codex beats Claude, and the death of org charts": {
+    "author": "Dan Shipper",
+    "role": "Co-founder & CEO, Every"
+  },
+  "Design Bootcamp - MCP For Designers": {
+    "author": "Beth Gilleeney"
+  },
+  "Designing AI Interfaces (Notion)": {
+    "author": "Vitaly Friedman"
+  },
+  "Eric Ries - How Anthropic, Costco, and Patagonia all build incorruptible companies": {
+    "author": "Eric Ries",
+    "role": "Author, The Lean Startup; Founder, LTSE"
+  },
+  "Evan Spiegel - How to win when software is not a moat": {
+    "author": "Evan Spiegel",
+    "role": "Co-founder & CEO, Snap"
+  },
+  "Fiona Fung - What happens after coding is solved": {
+    "author": "Fiona Fung",
+    "role": "Head of Engineering, Claude Code & Cowork (Anthropic)"
+  },
+  "GoPenAI - How Agentic RAG Works": {
+    "author": "Kadam Sayali"
+  },
+  "Groktop - Duolingo's AI-First Disaster": {
+    "author": "Magnus Hedemark"
+  },
+  "How Anthropic, Every, & Ramp design with AI": {
+    "author": "Ridd (Michael Riddering)",
+    "role": "Founder, Dive Club"
+  },
+  "How Claude Code's lead designer builds with AI": {
+    "author": "Meaghan Choi",
+    "role": "Lead Designer, Claude Code (Anthropic)"
+  },
+  "I'm (finally) showing how I design with AI": {
+    "author": "Ridd (Michael Riddering)",
+    "role": "Founder, Dive Club"
+  },
+  "IBM - AI Model Collapse": {
+    "author": "IBM"
+  },
+  "IBM Watson - Designing a Persona for Your Assistant": {
+    "author": "IBM"
+  },
+  "Jacob Warwick - He's negotiated $1B+ in executive compensation - Here's his playbook": {
+    "author": "Jacob Warwick",
+    "role": "Founder, ThinkWarwick"
+  },
+  "Jenny Wen - The design process is dead - Here's what's replacing it": {
+    "author": "Jenny Wen",
+    "role": "Head of Design, Claude (Anthropic)"
+  },
+  "Jessica Fain - The art of influence - The single most important skill left that AI can't replace": {
+    "author": "Jessica Fain",
+    "role": "Sr. Director of Product, Webflow"
+  },
+  "Katarina Batina - Making big bets with design": {
+    "author": "Katarina Batina",
+    "role": "VP of Design, Shopify"
+  },
+  "Keith Rabois - Hard truths about building in the AI era": {
+    "author": "Keith Rabois",
+    "role": "Managing Director, Khosla Ventures"
+  },
+  "Large Language Models explained briefly (3Blue1Brown)": {
+    "author": "Grant Sanderson (3Blue1Brown)"
+  },
+  "Learn Prompting - Introduction": {
+    "author": "Learn Prompting (Sander Schulhoff)"
+  },
+  "Lenny Rachitsky - A behind-the-scenes interview on building his newsletter and podcast": {
+    "author": "Lenny Rachitsky",
+    "role": "Founder, Lenny's Newsletter"
+  },
+  "LinkedIn - Eduard Kuric - AI Card Sorting Study": {
+    "author": "Eduard Kuric",
+    "role": "Founder & CEO, UXtweak"
+  },
+  "LinkedIn - Eilis Boyle - Designers Agent Organization": {
+    "author": "Eilis Boyle"
+  },
+  "LinkedIn - Emily Campbell - Examining the Skillset of AI Designers": {
+    "author": "Emily Campbell"
+  },
+  "LinkedIn - George Strakhov - AI Intelligence is not Human Intelligence": {
+    "author": "George Strakhov",
+    "role": "Global Head of Creative Technology, DDB"
+  },
+  "LinkedIn - Hiten Shah - AI Interfaces That Arent Chatbots": {
+    "author": "Hiten Shah",
+    "role": "Co-founder & CEO, Nira; Co-founder, Crazy Egg"
+  },
+  "LinkedIn - How to Prompt - AI Prompt Patterns Guide": {
+    "author": "How to Prompt (credit: Ian Nuttall)"
+  },
+  "LinkedIn - John Cutler - Setting Up Personas": {
+    "author": "John Cutler",
+    "role": "Product Evangelist, Amplitude"
+  },
+  "LinkedIn - Juozas Kaziukenas - Zalando AI Videos": {
+    "author": "Juozas Kaziukenas",
+    "role": "Founder, Marketplace Pulse"
+  },
+  "LinkedIn - Luke Wroblewski - AI Chat Isnt The Future": {
+    "author": "Luke Wroblewski",
+    "role": "Managing Director, Sutter Hill Ventures"
+  },
+  "LinkedIn - Marcin Kucharski - 1200 Hour Project": {
+    "author": "Marcin Kucharski"
+  },
+  "LinkedIn - Pawel Huryn - How To Measure AI UX (Evals)": {
+    "author": "Pawel Huryn",
+    "role": "Author, The Product Compass"
+  },
+  "LinkedIn - Sam G - Cursor plus Figma MCP at Intercom": {
+    "author": "Sam G",
+    "role": "Designer, Intercom"
+  },
+  "LinkedIn - Vitaly Friedman - Designing For Voice UX": {
+    "author": "Vitaly Friedman",
+    "role": "Founder, Smashing Magazine"
+  },
+  "Loredana Crisan - Figma's big bets for the future of AI design": {
+    "author": "Loredana Crisan",
+    "role": "Chief Design Officer, Figma"
+  },
+  "LukeW - Make AI Models Do The Prompting": {
+    "author": "Luke Wroblewski",
+    "role": "Managing Director, Sutter Hill Ventures"
+  },
+  "Mark Pincus - The hidden pattern behind successful products": {
+    "author": "Mark Pincus",
+    "role": "Founder, Zynga"
+  },
+  "Max Schoening - AI era skills - Why cultivating agency matters more than job titles": {
+    "author": "Max Schoening",
+    "role": "Head of Product, Notion"
+  },
+  "Microsoft - Guidelines for Human-AI Interaction": {
+    "author": "Microsoft Research"
+  },
+  "Microsoft - How Large Language Models Work": {
+    "author": "Andreas Stöffelbauer"
+  },
+  "Newline - MCP Explained": {
+    "author": "Maksym Mitusov"
+  },
+  "Nikhyl Singhal - Why half of product managers are in trouble": {
+    "author": "Nikhyl Singhal",
+    "role": "Founder, The Skip; ex-VP Product, Meta"
+  },
+  "One Useful Thing - Making AI Work in Practice": {
+    "author": "Ethan Mollick",
+    "role": "Professor, Wharton School"
+  },
+  "Polly D'Arcy - Going from IC to VP of Design at Wealthsimple": {
+    "author": "Polly D'Arcy",
+    "role": "VP of Design, Wealthsimple"
+  },
+  "Prompt Engineering Guide": {
+    "author": "DAIR.AI (Elvis Saravia)"
+  },
+  "Qasar Younis - The real AI revolution isn't software - It's farms, mines, and trucks": {
+    "author": "Qasar Younis",
+    "role": "Co-founder & CEO, Applied Intuition"
+  },
+  "Rafa Conde - Make your designs memorable": {
+    "author": "Rafa Conde",
+    "role": "Design Engineer, Retro"
+  },
+  "Ron Goldin - Building your ideas as a design leader": {
+    "author": "Ron Goldin",
+    "role": "Director of Product Design, Shopify"
+  },
+  "Search Engine Land - What is Generative Engine Optimization (GEO)": {
+    "author": "Leigh McKenzie"
+  },
+  "Sesame - Crossing the Uncanny Valley of Voice": {
+    "author": "Brendan Iribe, Ankit Kumar & the Sesame team"
+  },
+  "Siege Media - SEO Impact of AI Overviews": {
+    "author": "Ross Hudgens"
+  },
+  "Simon Willison - Things we learned about LLMs in 2024": {
+    "author": "Simon Willison",
+    "role": "Creator, Datasette; Co-creator, Django"
+  },
+  "SparkToro - AI Will Take All The Jobs, Nope": {
+    "author": "Rand Fishkin"
+  },
+  "Tommy Geoco - The state of the design industry right now": {
+    "author": "Tommy Geoco",
+    "role": "Owner, UX Tools"
+  },
+  "Tony Fadell - How to build real taste (and why AI makes it matter more)": {
+    "author": "Tony Fadell",
+    "role": "Founder, Nest; creator of the iPod"
+  },
+  "UX Design CC - AI Transparency in UX": {
+    "author": "Allie Paschal"
+  },
+  "UX Design CC - Voice UX Design and Prototyping for Mere Mortals": {
+    "author": "Arun George"
+  },
+  "UX for AI - AI Accuracy, F1 Score and Confusion Matrix": {
+    "author": "Greg Nudelman",
+    "role": "Founder, UX for AI"
+  },
+  "UX for AI - Shorthand UX Design Notation as AI Prompt": {
+    "author": "Greg Nudelman",
+    "role": "Founder, UX for AI"
+  },
+  "VUI Guide - Resources": {
+    "author": "Lars Mäder"
+  },
+  "Vercel - The Rise of the AI Crawler": {
+    "author": "Vercel"
+  },
+  "Voice Principles": {
+    "author": "Ben Sauer"
+  },
+  "What are AI Agents (IBM Technology)": {
+    "author": "Maya Murad (IBM Technology)"
+  },
+  "v7 Labs - Prompt Engineering Guide": {
+    "author": "V7 Labs"
+  }
+}

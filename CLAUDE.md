@@ -18,17 +18,24 @@ that vault root:
 - `Quotes.md` — the central, hand-curated list of extracted quotes. This is the primary
   deliverable; sources exist to feed it.
 - `Sources/<Source Name>/<Author> - <Title>.md` — one file per source, grouped into a
-  folder per source/publication (e.g. `Sources/Dive Club/`). Each source file begins with
-  the source **URL on line 1**, followed by a blank line and then the full text / transcript
-  the quotes are drawn from.
+  folder per source/publication (e.g. `Sources/Dive Club/`). Each source file begins with a
+  YAML frontmatter block carrying `author` and `role` (the speaker/writer and their title +
+  org, e.g. `role: Chief Design Officer, Figma`), then the source **URL** line, a blank line,
+  and the full text / transcript the quotes are drawn from. `role` may be left empty when
+  unknown.
 - `.obsidian/` — Obsidian app configuration. Do not hand-edit unless explicitly asked; the
   app manages these files. Sync and the `bases` plugin are enabled.
 
 ## Working conventions
 
-- **Adding a source:** create `Sources/<Source Name>/<Author> - <Title>.md` with the URL on
-  the first line, then the transcript/body. Match the existing folder-per-publication
-  grouping rather than inventing a flat structure.
+- **Adding a source:** create `Sources/<Source Name>/<Author> - <Title>.md` beginning with
+  `author`/`role` frontmatter, then the URL line, a blank line, and the transcript/body. Match
+  the existing folder-per-publication grouping rather than inventing a flat structure. The site
+  build (`build_site.py`) reads `author`/`role` from this frontmatter — only the frontmatter,
+  never the transcript — to attribute each quote. Because `Sources/` is gitignored, the build
+  also writes a tracked `authors.json` sidecar from that frontmatter; CI (which has no
+  `Sources/`) renders roles from it. So after adding/editing a source's `author`/`role`, run
+  `python3 build_site.py` and commit the updated `authors.json` for roles to reach the live site.
 - **Extracting a quote:** pull the verbatim text into `Quotes.md` and attribute it back to
   its source. Use Obsidian-style wiki-links (`[[Author - Title]]`) so backlinks and the graph
   view connect quotes to their origin — the `backlink`, `outgoing-link`, and `graph` plugins
