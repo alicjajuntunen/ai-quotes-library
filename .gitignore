@@ -10,3 +10,6 @@ Sources/
 
 # Generated site output (built by CI)
 dist/
+
+# Brainstorming companion mockups (local only)
+.superpowers/
