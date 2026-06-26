@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """Build a static index.html from the curated Quotes.md file.
 
-Parses the Obsidian-style quote list:
+Parses the Obsidian-style quote list, which is grouped by theme:
 
-    ## [[Author - Title]]
+    ## Theme name
     > "a quote"
-    > "another quote"
+    > — [[Author - Title]]
 
-and renders a single self-contained HTML page grouped by source.
-Only Quotes.md is read; the raw transcripts under Sources/ are never published.
+    > "another quote"
+    > — [[Author - Title]]
+
+and renders a single self-contained HTML page grouped by theme, with each
+quote attributed back to its source. Only Quotes.md is read; the raw
+transcripts under Sources/ are never published.
 """
 
 import html
@@ -20,33 +24,44 @@ QUOTES_FILE = Path("AI quotes library/Quotes.md")
 SOURCES_FILE = Path("sources.json")
 OUTPUT_FILE = Path("dist/index.html")
 
-HEADER_RE = re.compile(r"^##\s*\[\[(.+?)\]\]\s*$")
+THEME_RE = re.compile(r"^##\s+(?!\[\[)(.+?)\s*$")
+BYLINE_RE = re.compile(r"^>\s*[—–-]?\s*\[\[(.+?)\]\]\s*$")
 QUOTE_RE = re.compile(r"^>\s?(.*)$")
 
 
 def parse(text):
-    """Return a list of {author, title, raw, quotes:[...]} groups."""
-    groups = []
+    """Return a list of {theme, quotes:[{text, raw, author, title}]} groups."""
+    themes = []
     current = None
+    pending = []  # quote bodies seen but not yet attributed to a source
     for line in text.splitlines():
-        header = HEADER_RE.match(line)
-        if header:
-            raw = header.group(1).strip()
+        theme = THEME_RE.match(line)
+        if theme:
+            pending = []
+            current = {"theme": theme.group(1).strip(), "quotes": []}
+            themes.append(current)
+            continue
+        byline = BYLINE_RE.match(line)
+        if byline and current is not None and pending:
+            raw = byline.group(1).strip()
             author, _, title = raw.partition(" - ")
-            current = {
-                "raw": raw,
-                "author": author.strip() if title else "",
-                "title": title.strip() if title else raw,
-                "quotes": [],
-            }
-            groups.append(current)
+            for body in pending:
+                current["quotes"].append(
+                    {
+                        "text": body,
+                        "raw": raw,
+                        "author": author.strip() if title else "",
+                        "title": title.strip() if title else raw,
+                    }
+                )
+            pending = []
             continue
         quote = QUOTE_RE.match(line)
-        if quote and current is not None:
+        if quote:
             body = quote.group(1).strip()
             if body:
-                current["quotes"].append(body)
-    return [g for g in groups if g["quotes"]]
+                pending.append(body)
+    return [t for t in themes if t["quotes"]]
 
 
 def load_sources():
@@ -55,37 +70,47 @@ def load_sources():
     return {}
 
 
-def render(groups, sources):
-    total = sum(len(g["quotes"]) for g in groups)
-    sections = []
-    for g in groups:
-        quotes_html = "\n".join(
-            f"        <blockquote>{html.escape(q)}</blockquote>" for q in g["quotes"]
+def render_byline(quote, sources):
+    author = html.escape(quote["author"])
+    url = sources.get(quote["raw"])
+    if url:
+        href = html.escape(url, quote=True)
+        title = (
+            f'<a class="title" href="{href}" target="_blank" rel="noopener">'
+            f'{html.escape(quote["title"])}</a>'
         )
-        author = html.escape(g["author"])
-        url = sources.get(g["raw"])
-        if url:
-            href = html.escape(url, quote=True)
-            title = (
-                f'<a class="title" href="{href}" target="_blank" rel="noopener">'
-                f'{html.escape(g["title"])}</a>'
-            )
-        else:
-            title = f'<span class="title">{html.escape(g["title"])}</span>'
-        byline = (
+    else:
+        title = f'<span class="title">{html.escape(quote["title"])}</span>'
+    if author:
+        return (
             f'<p class="source"><span class="author">{author}</span>'
             f'<span class="sep">·</span>{title}</p>'
-            if author
-            else f'<p class="source">{title}</p>'
+        )
+    return f'<p class="source">{title}</p>'
+
+
+def render(themes, sources):
+    total = sum(len(t["quotes"]) for t in themes)
+    sections = []
+    for t in themes:
+        entries = "\n".join(
+            f'        <div class="entry">\n'
+            f'          <blockquote>{html.escape(q["text"])}</blockquote>\n'
+            f"          {render_byline(q, sources)}\n"
+            f"        </div>"
+            for q in t["quotes"]
         )
         sections.append(
-            f'      <section class="entry">\n{quotes_html}\n        {byline}\n      </section>'
+            f'      <section class="theme">\n'
+            f'        <h2 class="theme-title">{html.escape(t["theme"])}</h2>\n'
+            f"{entries}\n"
+            f"      </section>"
         )
     body = "\n".join(sections)
     return TEMPLATE.format(
         body=body,
         total=total,
-        sources=len(groups),
+        themes=len(themes),
     )
 
 
@@ -132,7 +157,18 @@ TEMPLATE = """<!doctype html>
     color: var(--accent);
     margin-top: 1.4rem;
   }}
-  .entry {{ padding: 4vh 0; border-top: 1px solid var(--rule); }}
+  .theme {{ margin-top: 7vh; }}
+  .theme:first-of-type {{ margin-top: 0; }}
+  .theme-title {{
+    font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+    margin: 0 0 1vh;
+    padding-bottom: 2vh;
+    border-bottom: 2px solid var(--accent);
+  }}
+  .entry {{ padding: 3.5vh 0; border-top: 1px solid var(--rule); }}
   .entry:first-of-type {{ border-top: none; }}
   blockquote {{
     margin: 0 0 1.4rem;
@@ -177,7 +213,7 @@ TEMPLATE = """<!doctype html>
     <header>
       <h1>AI Quotes Library</h1>
       <p class="lede">Notable quotes on AI, design, and craft.</p>
-      <p class="count">{total} quotes · {sources} sources</p>
+      <p class="count">{total} quotes · {themes} themes</p>
     </header>
     <main>
 {body}
@@ -193,12 +229,12 @@ TEMPLATE = """<!doctype html>
 
 def main():
     text = QUOTES_FILE.read_text(encoding="utf-8")
-    groups = parse(text)
+    themes = parse(text)
     sources = load_sources()
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_FILE.write_text(render(groups, sources), encoding="utf-8")
-    total = sum(len(g["quotes"]) for g in groups)
-    print(f"Wrote {OUTPUT_FILE}: {total} quotes from {len(groups)} sources")
+    OUTPUT_FILE.write_text(render(themes, sources), encoding="utf-8")
+    total = sum(len(t["quotes"]) for t in themes)
+    print(f"Wrote {OUTPUT_FILE}: {total} quotes across {len(themes)} themes")
 
 
 if __name__ == "__main__":
