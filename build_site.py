@@ -22,7 +22,13 @@ from pathlib import Path
 
 QUOTES_FILE = Path("AI quotes library/Quotes.md")
 SOURCES_FILE = Path("sources.json")
+SOURCES_DIR = Path("AI quotes library/Sources")
+AUTHORS_FILE = Path("authors.json")
 OUTPUT_FILE = Path("dist/index.html")
+# The local preview server runs sandboxed out of this (TCC-protected) folder,
+# so it reads from a copy under /tmp instead. We refresh that copy here only if
+# its directory already exists, so a normal build is unaffected on other setups.
+PREVIEW_MIRROR = Path("/tmp/ai-quotes-preview/index.html")
 
 THEME_RE = re.compile(r"^##\s+(?!\[\[)(.+?)\s*$")
 BYLINE_RE = re.compile(r"^>\s*[—–-]?\s*\[\[(.+?)\]\]\s*$")
@@ -70,8 +76,80 @@ def load_sources():
     return {}
 
 
-def render_byline(quote, sources):
-    author = html.escape(quote["author"])
+def scan_frontmatter():
+    """Scan Sources/ frontmatter into {file-stem: {author, role}}.
+
+    Reads only the YAML frontmatter block at the top of each source file; the
+    transcript body is never inspected or published. Returns {} when Sources/
+    is absent (e.g. on CI, where transcripts are gitignored).
+    """
+    meta = {}
+    if not SOURCES_DIR.exists():
+        return meta
+    for path in SOURCES_DIR.rglob("*.md"):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        if not lines or lines[0].strip() != "---":
+            continue
+        fields = {}
+        for line in lines[1:]:
+            if line.strip() == "---":
+                break
+            key, sep, val = line.partition(":")
+            if sep:
+                fields[key.strip()] = val.strip().strip('"')
+        entry = {k: fields[k] for k in ("author", "role") if fields.get(k)}
+        if entry:
+            meta[path.stem] = entry
+    return meta
+
+
+def load_source_meta():
+    """Return {file-stem: {author, role}} for attributing quotes.
+
+    Sources/ holds the gitignored transcripts, so it's only present in local
+    builds. When it is, we scan its frontmatter and refresh the tracked
+    authors.json sidecar from it. On CI (Sources/ absent) we fall back to that
+    committed sidecar, so roles still render on the deployed site.
+    """
+    meta = scan_frontmatter()
+    if meta:
+        AUTHORS_FILE.write_text(
+            json.dumps(meta, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        return meta
+    if AUTHORS_FILE.exists():
+        return json.loads(AUTHORS_FILE.read_text(encoding="utf-8"))
+    return {}
+
+
+def render_cardtop(quote, sources):
+    """Top row of a card: a big quote-mark glyph and, when the quote has a
+    source URL, a square arrow link to it. The arrow is omitted entirely when
+    there is no URL, so no dead button is rendered."""
+    url = sources.get(quote["raw"])
+    arrow = ""
+    if url:
+        href = html.escape(url, quote=True)
+        arrow = (
+            f'<a class="arrow" href="{href}" target="_blank" rel="noopener" '
+            f'aria-label="Open source">'
+            f'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
+            f'stroke="currentColor" stroke-width="1.6">'
+            f'<path d="M7 17 17 7M9 7h8v8"/></svg></a>'
+        )
+    return (
+        f'<div class="card-top">'
+        f'<span class="qmark" aria-hidden="true">&ldquo;</span>'
+        f"{arrow}"
+        f"</div>"
+    )
+
+
+def render_byline(quote, sources, source_meta):
+    meta = source_meta.get(quote["raw"], {})
+    author = html.escape(meta.get("author") or quote["author"])
+    role = html.escape(meta.get("role", ""))
     url = sources.get(quote["raw"])
     if url:
         href = html.escape(url, quote=True)
@@ -81,29 +159,40 @@ def render_byline(quote, sources):
         )
     else:
         title = f'<span class="title">{html.escape(quote["title"])}</span>'
+    parts = []
     if author:
-        return (
-            f'<p class="source"><span class="author">{author}</span>'
-            f'<span class="sep">·</span>{title}</p>'
-        )
-    return f'<p class="source">{title}</p>'
+        parts.append(f'<span class="author">{author}</span>')
+    if role:
+        parts.append(f'<span class="role">{role}</span>')
+    parts.append(title)
+    inner = '<span class="sep">·</span>'.join(parts)
+    return f'<figcaption class="source">{inner}</figcaption>'
 
 
-def render(themes, sources):
+def render(themes, sources, source_meta):
     total = sum(len(t["quotes"]) for t in themes)
     sections = []
-    for t in themes:
+    for i, t in enumerate(themes, start=1):
         entries = "\n".join(
-            f'        <div class="entry">\n'
-            f'          <blockquote>{html.escape(q["text"])}</blockquote>\n'
-            f"          {render_byline(q, sources)}\n"
-            f"        </div>"
+            f'          <figure class="quote">\n'
+            f"            {render_cardtop(q, sources)}\n"
+            f'            <blockquote>{html.escape(q["text"])}</blockquote>\n'
+            f"            {render_byline(q, sources, source_meta)}\n"
+            f"          </figure>"
             for q in t["quotes"]
         )
+        n = len(t["quotes"])
+        label = "quote" if n == 1 else "quotes"
         sections.append(
             f'      <section class="theme">\n'
-            f'        <h2 class="theme-title">{html.escape(t["theme"])}</h2>\n'
+            f'        <header class="theme-head">\n'
+            f'          <span class="theme-index">{i:02d}</span>\n'
+            f'          <h2 class="theme-name">{html.escape(t["theme"])}</h2>\n'
+            f'          <span class="theme-count">{n} {label}</span>\n'
+            f"        </header>\n"
+            f'        <div class="quotes">\n'
             f"{entries}\n"
+            f"        </div>\n"
             f"      </section>"
         )
     body = "\n".join(sections)
@@ -121,13 +210,19 @@ TEMPLATE = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Quotes Library</title>
 <meta name="description" content="A curated collection of notable quotes about AI, design, and craft.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   :root {{
-    --bg: #f6f4ef;
-    --ink: #1c1b19;
-    --muted: #6b6760;
-    --rule: #d9d4ca;
-    --accent: #b4541f;
+    --bg: #f4f2ec;
+    --ink: #181712;
+    --muted: #8c877b;
+    --faint: #c7c1b3;
+    --rule: #e0dccf;
+    --serif-display: "Playfair Display", Georgia, "Times New Roman", serif;
+    --serif-text: "Spectral", Georgia, "Iowan Old Style", serif;
+    --sans: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }}
   * {{ box-sizing: border-box; }}
   html {{ -webkit-text-size-adjust: 100%; }}
@@ -135,85 +230,149 @@ TEMPLATE = """<!doctype html>
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
-    line-height: 1.5;
+    font-family: var(--serif-text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }}
-  .wrap {{ max-width: 720px; margin: 0 auto; padding: 8vh 24px 16vh; }}
-  header {{ margin-bottom: 7vh; }}
+  .wrap {{ max-width: 760px; margin: 0 auto; padding: 14vh 28px 20vh; }}
+
+  /* Masthead */
+  .masthead {{ margin-bottom: 16vh; }}
   h1 {{
-    font-size: clamp(2.2rem, 6vw, 3.4rem);
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    margin: 0 0 0.6rem;
-    font-weight: 700;
+    margin: 0;
+    font-family: var(--serif-display);
+    font-weight: 400;
+    font-size: clamp(2.8rem, 9vw, 5rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
   }}
-  .lede {{ color: var(--muted); font-size: 1.05rem; margin: 0; font-style: italic; }}
-  .count {{
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-style: normal;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-top: 1.4rem;
+  .lede {{
+    margin: 1.6rem 0 0;
+    max-width: 34ch;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--muted);
   }}
-  .theme {{ margin-top: 7vh; }}
+
+  /* Theme sections */
+  .theme {{ margin-top: 15vh; }}
   .theme:first-of-type {{ margin-top: 0; }}
-  .theme-title {{
-    font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+  .theme-head {{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    column-gap: 1.2rem;
+    padding-bottom: 1.8rem;
+    border-bottom: 1px solid var(--ink);
+  }}
+  .theme-index {{
+    font-family: var(--serif-display);
+    font-size: 1rem;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }}
+  .theme-name {{
+    margin: 0;
+    font-family: var(--serif-display);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 4.2vw, 2.4rem);
     line-height: 1.1;
     letter-spacing: -0.01em;
-    font-weight: 700;
-    margin: 0 0 1vh;
-    padding-bottom: 2vh;
-    border-bottom: 2px solid var(--accent);
   }}
-  .entry {{ padding: 3.5vh 0; border-top: 1px solid var(--rule); }}
-  .entry:first-of-type {{ border-top: none; }}
-  blockquote {{
-    margin: 0 0 1.4rem;
-    font-size: 1.3rem;
-    line-height: 1.45;
-    text-indent: -0.5em;
+  .theme-count {{
+    font-family: var(--sans);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
   }}
-  blockquote:last-of-type {{ margin-bottom: 1.6rem; }}
-  .source {{
+
+  /* Quotes */
+  .quotes {{ margin-top: 1rem; }}
+  .quote {{
     margin: 0;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 0.82rem;
-    letter-spacing: 0.02em;
+    padding: 4.5vh 0;
+    border-bottom: 1px solid var(--rule);
+  }}
+  .quote:last-child {{ border-bottom: none; }}
+  blockquote {{
+    margin: 0;
+    font-size: clamp(1.3rem, 2.6vw, 1.6rem);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }}
+  .source {{
+    margin-top: 1.6rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
     color: var(--muted);
   }}
-  .source .author {{ color: var(--ink); }}
-  .source .sep {{ margin: 0 0.5em; opacity: 0.5; }}
-  .source a.title {{
-    color: var(--accent);
+  .source .author {{
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink);
+  }}
+  .source .role {{
+    font-family: var(--serif-text);
+    font-style: italic;
+    font-size: 0.95rem;
+    letter-spacing: 0;
+  }}
+  .source .title {{
+    font-family: var(--serif-text);
+    font-style: italic;
+    font-size: 0.95rem;
+    letter-spacing: 0;
+    color: var(--muted);
+  }}
+  .source .sep {{ margin: 0 0.7em; color: var(--faint); }}
+  a.title {{
     text-decoration: none;
-    border-bottom: 1px solid transparent;
+    border-bottom: 1px solid var(--faint);
+    transition: border-color 0.18s ease, color 0.18s ease;
   }}
-  .source a.title:hover {{ border-bottom-color: currentColor; }}
+  a.title:hover {{ color: var(--ink); border-bottom-color: var(--ink); }}
+
   footer {{
-    margin-top: 10vh;
-    padding-top: 4vh;
+    margin-top: 18vh;
+    padding-top: 3rem;
     border-top: 1px solid var(--rule);
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
     color: var(--muted);
-    font-size: 0.85rem;
   }}
-  footer a {{ color: var(--accent); }}
+  footer code {{ font-family: var(--sans); font-style: italic; }}
+
+  @media (max-width: 600px) {{
+    .wrap {{ padding: 9vh 20px 14vh; }}
+    .theme-head {{ grid-template-columns: 1fr auto; }}
+    .theme-index {{ display: none; }}
+  }}
+
   @media (prefers-color-scheme: dark) {{
     :root {{
-      --bg: #16150f; --ink: #ece8df; --muted: #9c968a;
-      --rule: #34322a; --accent: #e08a4e;
+      --bg: #141310;
+      --ink: #ece8df;
+      --muted: #948f83;
+      --faint: #4a463c;
+      --rule: #2c2a23;
     }}
   }}
 </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <header class="masthead">
       <h1>AI Quotes Library</h1>
-      <p class="lede">Notable quotes on AI, design, and craft.</p>
-      <p class="count">{total} quotes · {themes} themes</p>
+      <p class="lede">Notable voices on AI, design, and the craft that endures.</p>
     </header>
     <main>
 {body}
@@ -231,8 +390,12 @@ def main():
     text = QUOTES_FILE.read_text(encoding="utf-8")
     themes = parse(text)
     sources = load_sources()
+    source_meta = load_source_meta()
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_FILE.write_text(render(themes, sources), encoding="utf-8")
+    page = render(themes, sources, source_meta)
+    OUTPUT_FILE.write_text(page, encoding="utf-8")
+    if PREVIEW_MIRROR.parent.is_dir():
+        PREVIEW_MIRROR.write_text(page, encoding="utf-8")
     total = sum(len(t["quotes"]) for t in themes)
     print(f"Wrote {OUTPUT_FILE}: {total} quotes across {len(themes)} themes")
 
