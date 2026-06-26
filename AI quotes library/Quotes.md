@@ -22,6 +22,12 @@
 > "This is what AI is actually really, really good at: Robot Monkey work. Freeing designers to do what actual humans do best. Human work. Empathy. Story. Communication. Invention. Innovation."
 > — [[UX for AI - Shorthand UX Design Notation as AI Prompt]]
 
+> "humor is the last frontier that no AI can really touch and humor comes from weird places in your mind of some weird mix of trauma pattern matching and absurdism"
+> — [[How a non-technical founder built a $100K ARR meme company - Jason Levin (Memelord CEO)]]
+
+> "It gets to 80%. But like that taste, that craft is like that's why designers will always exist in my opinion. Like they know how to elevate the experience... it's not going to be perfect. And like we are here to steer them."
+> — [[The internal AI tool that's transforming how Stripe designs products - Owen Williams]]
+
 
 ## The last mile is ours
 
@@ -37,6 +43,9 @@
 > "I think we have no excuse anymore to not be responsible for those changes that we want to see... these digital artifacts are extensions of our work and our practice. And we have the ability now to just own how that gets delivered."
 > — [[Andy Madrick - Why AI changed design handoff forever]]
 
+> "Product building and code writing now looks like carving rather than constructing. So it's very fast to create something that has too many features and too many buttons and too much code and you need to spend a lot of time removing stuff."
+> — [[Braintrust CEO - Evals are the new PRD for AI products]]
+
 
 ## Direct it, don't expect it to design
 
@@ -51,6 +60,9 @@
 
 > "The AI becomes a little bit more of a collaborator rather than just a generator of outputs."
 > — [[Addy Osmani - The AI-Assisted Developer Workflow (JSNation US 2024)]]
+
+> "You shouldn't be defining the work, you should be defining what success looks like."
+> — [[I let Codex run for 6 hours. Here's what happened]]
 
 
 ## When everyone can build, judgment wins
@@ -73,6 +85,12 @@
 > "When everybody can build anything, it becomes super clear who has great judgment and who doesn't."
 > — [[Polly D'Arcy - Going from IC to VP of Design at Wealthsimple]]
 
+> "People are unconstrained by execution and they can take a good idea that adds value to them and build it and make it real and not just make it real, make it production ready."
+> — [[How to build an iPhone app with zero technical skills]]
+
+> "I think the hardest thing for PMs is often they can't like manifest the thing that they want to. It actually makes them better at communicating with their own designer... they can test their idea a lot earlier in the funnel."
+> — [[The internal AI tool that's transforming how Stripe designs products - Owen Williams]]
+
 
 ## Make people feel something
 
@@ -81,6 +99,9 @@
 
 > "When people realize that what's being put in front of them is inauthentic and it's just created by AI, they disengage. Research says this very very clearly."
 > — [[Loredana Crisan - Figma's big bets for the future of AI design]]
+
+> "memes and humor is like how you show you're human in a world full of slop... the personal connections and throwing weird events and hanging out IRL and buying your customers coffee like the old skills that like people have laughed at for years are more important than ever."
+> — [[How a non-technical founder built a $100K ARR meme company - Jason Levin (Memelord CEO)]]
 
 
 ## Don't skip the thinking
@@ -115,6 +136,15 @@
 > "We are all finding that building software isn't as hard as it used to be, but growing an audience is as hard as it always has been."
 > — [[Ron Goldin - Building your ideas as a design leader]]
 
+> "Everyone should take a hard look in the mirror and re-evaluate how they spend their time. There's a lot of interactions that you have or direction that you're giving or decisions that you're making and I think like many of these things to me fit below the agent line. I think the agent line keeps going up."
+> — [[Braintrust CEO - Evals are the new PRD for AI products]]
+
+> "People that get, dare I say, territorial or constrained by what they used to do or what other people used to do are going to struggle with relevance and playing nicely in the sandbox."
+> — [[How to build an iPhone app with zero technical skills]]
+
+> "I think my babysitting days are largely over with AI. Not completely over, I'm still babysitting a branch right now, but largely over with AI."
+> — [[I let Codex run for 6 hours. Here's what happened]]
+
 
 ## Agency is the new advantage
 
@@ -133,6 +163,18 @@
 > "The time to begin isn't when everything becomes clear - it's now, while everything is still messy and uncertain. The advantage goes to those willing to learn fastest."
 > — [[One Useful Thing - Making AI Work in Practice]]
 
+> "A truly magical thing is happening with kids because they've never learned what not to ask for. And I think our generation, we're very used to things just not working. So we've been living in this mind prison for many years."
+> — [[How the engineer behind Claude Cowork actually uses Claude - Felix Rieseberg (Anthropic)]]
+
+> "Anytime you're like doing something that's tedious... go that abstraction layer up. How could Claude do this, and then how could I never do this again?"
+> — [[How the engineer behind Claude Cowork actually uses Claude - Felix Rieseberg (Anthropic)]]
+
+> "A beginner's mindset can be used to your advantage here because I truly don't know what I don't know."
+> — [[How to build an iPhone app with zero technical skills]]
+
+> "We actually lower the bar in terms of like tenure or experience level. We actually optimize now for high curiosity, high agency, and high energy."
+> — [[How to turn your company into AI builders - John Kim (Sendbird, co-founder and CEO)]]
+
 
 ## Powerful tools, unreliable hands
 
@@ -150,6 +192,9 @@
 
 > "The question isn't whether AI will transform your workforce—it's whether you'll use it as a sledgehammer to break down what you've built, or as a sophisticated tool to enhance what makes your people exceptional."
 > — [[Groktop - Duolingo's AI-First Disaster]]
+
+> "What I really appreciate about these new generative AI models, in particular these multimodal ones, image and video, is it unlocks for me an ability to create something that I would have never been able to do before. So I would have never been able to solo produce a hype video for my podcast. I would have a hard time brainstorming it, I wouldn't know how to frame it, I wouldn't know how to block it. But now I have this AI producer here that can help me with this effort."
+> — [[I cloned myself with Gemini Omni in 15 minutes (and it's terrifyingly good)]]
 
 
 ## Shifting, not collapsing

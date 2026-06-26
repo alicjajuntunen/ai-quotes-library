@@ -52,6 +52,10 @@
     "author": "Josh Clark",
     "role": "Principal, Big Medium"
   },
+  "Braintrust CEO - Evals are the new PRD for AI products": {
+    "author": "Ankur Goyal",
+    "role": "Co-founder & CEO, Braintrust"
+  },
   "Brett Williams - How a Visual Designer Became a Builder": {
     "author": "Brett Williams",
     "role": "Founder, Designjoy"
@@ -67,6 +71,14 @@
   "Claire Vo - From skeptic to true believer - How OpenClaw changed my life": {
     "author": "Claire Vo",
     "role": "Founder, ChatPRD; CPO, LaunchDarkly"
+  },
+  "Claude Code Just Got WAY More Powerful": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
+  },
+  "Claude Fable 5 - is this Mythos model worth the wait": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
   },
   "Dan Shipper - AI predictions - Job markets, Codex beats Claude, and the death of org charts": {
     "author": "Dan Shipper",
@@ -90,6 +102,14 @@
     "author": "Fiona Fung",
     "role": "Head of Engineering, Claude Code & Cowork (Anthropic)"
   },
+  "GLM 5.2 is SO GOOD (and almost free)": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
+  },
+  "GPT-5.5 crushed 6 months of tech debt": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
+  },
   "GoPenAI - How Agentic RAG Works": {
     "author": "Kadam Sayali"
   },
@@ -103,6 +123,42 @@
   "How Claude Code's lead designer builds with AI": {
     "author": "Meaghan Choi",
     "role": "Lead Designer, Claude Code (Anthropic)"
+  },
+  "How Mozilla Uses Claude Mythos to find Firefox bugs before hackers do": {
+    "author": "Brian Grinstead",
+    "role": "Distinguished Engineer, Mozilla Firefox"
+  },
+  "How a non-technical founder built a $100K ARR meme company - Jason Levin (Memelord CEO)": {
+    "author": "Jason Levin",
+    "role": "CEO, Memelord"
+  },
+  "How the engineer behind Claude Cowork actually uses Claude - Felix Rieseberg (Anthropic)": {
+    "author": "Felix Rieseberg",
+    "role": "Engineering Lead, Anthropic"
+  },
+  "How to build an iPhone app with zero technical skills": {
+    "author": "Bryce Ratner Keithley",
+    "role": "Founder, Great Team Partners"
+  },
+  "How to turn your company into AI builders - John Kim (Sendbird, co-founder and CEO)": {
+    "author": "John Kim",
+    "role": "Co-founder & CEO, Sendbird"
+  },
+  "How to write AI agent loops in Claude Code and Codex": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
+  },
+  "I cloned myself with Gemini Omni in 15 minutes (and it's terrifyingly good)": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
+  },
+  "I let Codex run for 6 hours. Here's what happened": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
+  },
+  "I spent $200 on Claude Design so you don't have to": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
   },
   "I'm (finally) showing how I design with AI": {
     "author": "Ridd (Michael Riddering)",
@@ -221,6 +277,10 @@
     "author": "Nikhyl Singhal",
     "role": "Founder, The Skip; ex-VP Product, Meta"
   },
+  "No hype Claude Opus 4.8 review—my real experience": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
+  },
   "One Useful Thing - Making AI Work in Practice": {
     "author": "Ethan Mollick",
     "role": "Professor, Wharton School"
@@ -250,6 +310,9 @@
   "Sesame - Crossing the Uncanny Valley of Voice": {
     "author": "Brendan Iribe, Ankit Kumar & the Sesame team"
   },
+  "She built a Claude shopping assistant to stop buying cheap junk": {
+    "author": "Nicole Ruiz"
+  },
   "Siege Media - SEO Impact of AI Overviews": {
     "author": "Ross Hudgens"
   },
@@ -259,6 +322,14 @@
   },
   "SparkToro - AI Will Take All The Jobs, Nope": {
     "author": "Rand Fishkin"
+  },
+  "Spec-driven development - the AI engineering workflow at Notion - Ryan Nystrom": {
+    "author": "Ryan Nystrom",
+    "role": "Engineering Manager, Notion"
+  },
+  "The internal AI tool that's transforming how Stripe designs products - Owen Williams": {
+    "author": "Owen Williams",
+    "role": "Design Manager, Stripe"
   },
   "Tommy Geoco - The state of the design industry right now": {
     "author": "Tommy Geoco",
@@ -291,8 +362,16 @@
   "Voice Principles": {
     "author": "Ben Sauer"
   },
+  "Was anything good released at Google I-O 2026": {
+    "author": "Claire Vo",
+    "role": "Host, How I AI"
+  },
   "What are AI Agents (IBM Technology)": {
     "author": "Maya Murad (IBM Technology)"
+  },
+  "Why this Claude Code engineer uses HTML files as AI specs - Thariq Shihipar (Anthropic)": {
+    "author": "Thariq Shihipar",
+    "role": "Engineer, Anthropic"
   },
   "v7 Labs - Prompt Engineering Guide": {
     "author": "V7 Labs"
