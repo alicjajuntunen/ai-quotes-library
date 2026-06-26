@@ -123,25 +123,24 @@ def load_source_meta():
     return {}
 
 
+def strip_quotes(text):
+    """Drop a single pair of surrounding quotation marks, if present.
+
+    Quotes.md stores each quote with its literal wrapping quote marks; the card
+    shows the quote-glyph icon instead, so we strip the redundant marks here
+    rather than editing the verbatim source."""
+    pairs = (('"', '"'), ("“", "”"), ("‘", "’"), ("'", "'"))
+    for open_q, close_q in pairs:
+        if text.startswith(open_q) and text.endswith(close_q) and len(text) >= 2:
+            return text[len(open_q):-len(close_q)].strip()
+    return text
+
+
 def render_cardtop(quote, sources):
-    """Top row of a card: a big quote-mark glyph and, when the quote has a
-    source URL, a square arrow link to it. The arrow is omitted entirely when
-    there is no URL, so no dead button is rendered."""
-    url = sources.get(quote["raw"])
-    arrow = ""
-    if url:
-        href = html.escape(url, quote=True)
-        arrow = (
-            f'<a class="arrow" href="{href}" target="_blank" rel="noopener" '
-            f'aria-label="Open source">'
-            f'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" '
-            f'stroke="currentColor" stroke-width="1.6">'
-            f'<path d="M7 17 17 7M9 7h8v8"/></svg></a>'
-        )
+    """Top row of a card: just the big quote-mark glyph."""
     return (
         f'<div class="card-top">'
         f'<span class="qmark" aria-hidden="true">&ldquo;</span>'
-        f"{arrow}"
         f"</div>"
     )
 
@@ -172,28 +171,25 @@ def render_byline(quote, sources, source_meta):
 def render(themes, sources, source_meta):
     total = sum(len(t["quotes"]) for t in themes)
     sections = []
-    for i, t in enumerate(themes, start=1):
+    for t in themes:
         entries = "\n".join(
             f'          <figure class="quote">\n'
             f"            {render_cardtop(q, sources)}\n"
-            f'            <blockquote>{html.escape(q["text"])}</blockquote>\n'
+            f'            <blockquote>{html.escape(strip_quotes(q["text"]))}</blockquote>\n'
             f"            {render_byline(q, sources, source_meta)}\n"
             f"          </figure>"
             for q in t["quotes"]
         )
-        n = len(t["quotes"])
-        label = "quote" if n == 1 else "quotes"
         sections.append(
-            f'      <section class="theme">\n'
-            f'        <header class="theme-head">\n'
-            f'          <span class="theme-index">{i:02d}</span>\n'
+            f'      <details class="theme" open>\n'
+            f'        <summary class="theme-head">\n'
             f'          <h2 class="theme-name">{html.escape(t["theme"])}</h2>\n'
-            f'          <span class="theme-count">{n} {label}</span>\n'
-            f"        </header>\n"
+            f'          <span class="theme-toggle" aria-hidden="true"></span>\n'
+            f"        </summary>\n"
             f'        <div class="quotes">\n'
             f"{entries}\n"
             f"        </div>\n"
-            f"      </section>"
+            f"      </details>"
         )
     body = "\n".join(sections)
     return TEMPLATE.format(
@@ -248,31 +244,36 @@ TEMPLATE = """<!doctype html>
     line-height: 1.02;
     letter-spacing: -0.015em;
   }}
-  .lede {{
-    margin: 1.6rem 0 0;
-    max-width: 34ch;
-    font-style: italic;
-    font-size: 1.2rem;
-    color: var(--muted);
-  }}
 
   /* Theme sections */
   .theme {{ margin-top: 15vh; }}
   .theme:first-of-type {{ margin-top: 0; }}
   .theme-head {{
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 1fr auto;
     align-items: baseline;
     column-gap: 1.2rem;
     padding-bottom: 1.8rem;
-    border-bottom: 1px solid var(--ink);
+    cursor: pointer;
+    list-style: none;
   }}
-  .theme-index {{
-    font-family: var(--serif-display);
-    font-size: 1rem;
-    color: var(--faint);
-    font-variant-numeric: tabular-nums;
+  .theme-head::-webkit-details-marker {{ display: none; }}
+  .theme-head:focus-visible {{
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
   }}
+  .theme-toggle {{
+    align-self: center;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-right: 1.5px solid var(--muted);
+    border-bottom: 1.5px solid var(--muted);
+    transform: rotate(45deg);
+    transform-origin: center;
+    transition: transform 0.2s ease, border-color 0.18s ease;
+  }}
+  .theme[open] .theme-toggle {{ transform: rotate(-135deg); }}
+  .theme-head:hover .theme-toggle {{ border-color: var(--ink); }}
   .theme-name {{
     margin: 0;
     font-family: var(--serif-display);
@@ -281,36 +282,28 @@ TEMPLATE = """<!doctype html>
     line-height: 1.1;
     letter-spacing: -0.01em;
   }}
-  .theme-count {{
-    font-family: var(--sans);
-    font-size: 0.66rem;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--muted);
-    white-space: nowrap;
-  }}
 
   /* Quotes — card grid */
   .quotes {{
-    margin-top: 2rem;
+    margin-top: 2.5rem;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    align-items: stretch;
   }}
   .quote {{
     margin: 0;
     display: flex;
     flex-direction: column;
-    padding: 18px 26px 22px;
+    padding: 24px 28px 26px;
     background: var(--card);
     border: 1px solid var(--rule);
-    border-radius: 0;
-    box-shadow: 0 14px 30px -24px rgba(24, 23, 18, 0.5);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.25);
   }}
   .card-top {{
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: flex-start;
   }}
   .qmark {{
@@ -319,19 +312,6 @@ TEMPLATE = """<!doctype html>
     line-height: 0.8;
     color: var(--ink);
   }}
-  .arrow {{
-    width: 38px;
-    height: 38px;
-    margin-top: 14px;
-    border: 1px solid var(--ink);
-    color: var(--ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    transition: background 0.18s ease, color 0.18s ease;
-  }}
-  .arrow:hover {{ background: var(--ink); color: var(--card); }}
   blockquote {{
     margin: 0;
     font-size: clamp(1.1rem, 2vw, 1.18rem);
@@ -370,10 +350,9 @@ TEMPLATE = """<!doctype html>
   .source .sep {{ margin: 0 0.7em; color: var(--faint); }}
   a.title {{
     text-decoration: none;
-    border-bottom: 1px solid var(--faint);
-    transition: border-color 0.18s ease, color 0.18s ease;
+    transition: color 0.18s ease;
   }}
-  a.title:hover {{ color: var(--ink); border-bottom-color: var(--ink); }}
+  a.title:hover {{ color: var(--ink); }}
 
   footer {{
     margin-top: 18vh;
@@ -388,9 +367,7 @@ TEMPLATE = """<!doctype html>
 
   @media (max-width: 700px) {{
     .wrap {{ padding: 9vh 20px 14vh; }}
-    .quotes {{ grid-template-columns: 1fr; }}
-    .theme-head {{ grid-template-columns: 1fr auto; }}
-    .theme-index {{ display: none; }}
+    .quotes {{ gap: 18px; }}
   }}
 
   @media (prefers-color-scheme: dark) {{
@@ -409,7 +386,6 @@ TEMPLATE = """<!doctype html>
   <div class="wrap">
     <header class="masthead">
       <h1>AI Quotes Library</h1>
-      <p class="lede">Notable voices on AI, design, and the craft that endures.</p>
     </header>
     <main>
 {body}
