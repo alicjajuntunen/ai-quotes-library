@@ -215,12 +215,12 @@ TEMPLATE = """<!doctype html>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   :root {{
-    --bg: #f4f2ec;
-    --ink: #181712;
-    --muted: #8c877b;
-    --faint: #c7c1b3;
-    --rule: #e0dccf;
-    --card: #fffdf8;
+    --bg: #f3f3f1;
+    --ink: #1a1a18;
+    --muted: #888884;
+    --faint: #c6c5c1;
+    --rule: #e3e2de;
+    --card: #fcfcfb;
     --serif-display: "Playfair Display", Georgia, "Times New Roman", serif;
     --serif-text: "Spectral", Georgia, "Iowan Old Style", serif;
     --sans: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -395,12 +395,12 @@ TEMPLATE = """<!doctype html>
 
   @media (prefers-color-scheme: dark) {{
     :root {{
-      --bg: #141310;
-      --ink: #ece8df;
-      --muted: #948f83;
-      --faint: #4a463c;
-      --rule: #2c2a23;
-      --card: #1c1a16;
+      --bg: #131312;
+      --ink: #eae9e5;
+      --muted: #918f8a;
+      --faint: #46453f;
+      --rule: #2a2a27;
+      --card: #1b1b19;
     }}
   }}
 </style>
