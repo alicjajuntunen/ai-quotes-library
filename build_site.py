@@ -12,10 +12,12 @@ Only Quotes.md is read; the raw transcripts under Sources/ are never published.
 """
 
 import html
+import json
 import re
 from pathlib import Path
 
 QUOTES_FILE = Path("AI quotes library/Quotes.md")
+SOURCES_FILE = Path("sources.json")
 OUTPUT_FILE = Path("dist/index.html")
 
 HEADER_RE = re.compile(r"^##\s*\[\[(.+?)\]\]\s*$")
@@ -47,7 +49,13 @@ def parse(text):
     return [g for g in groups if g["quotes"]]
 
 
-def render(groups):
+def load_sources():
+    if SOURCES_FILE.exists():
+        return json.loads(SOURCES_FILE.read_text(encoding="utf-8"))
+    return {}
+
+
+def render(groups, sources):
     total = sum(len(g["quotes"]) for g in groups)
     sections = []
     for g in groups:
@@ -55,12 +63,20 @@ def render(groups):
             f"        <blockquote>{html.escape(q)}</blockquote>" for q in g["quotes"]
         )
         author = html.escape(g["author"])
-        title = html.escape(g["title"])
+        url = sources.get(g["raw"])
+        if url:
+            href = html.escape(url, quote=True)
+            title = (
+                f'<a class="title" href="{href}" target="_blank" rel="noopener">'
+                f'{html.escape(g["title"])}</a>'
+            )
+        else:
+            title = f'<span class="title">{html.escape(g["title"])}</span>'
         byline = (
             f'<p class="source"><span class="author">{author}</span>'
-            f'<span class="sep">·</span><span class="title">{title}</span></p>'
+            f'<span class="sep">·</span>{title}</p>'
             if author
-            else f'<p class="source"><span class="title">{title}</span></p>'
+            else f'<p class="source">{title}</p>'
         )
         sections.append(
             f'      <section class="entry">\n{quotes_html}\n        {byline}\n      </section>'
@@ -134,6 +150,12 @@ TEMPLATE = """<!doctype html>
   }}
   .source .author {{ color: var(--ink); }}
   .source .sep {{ margin: 0 0.5em; opacity: 0.5; }}
+  .source a.title {{
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }}
+  .source a.title:hover {{ border-bottom-color: currentColor; }}
   footer {{
     margin-top: 10vh;
     padding-top: 4vh;
@@ -172,8 +194,9 @@ TEMPLATE = """<!doctype html>
 def main():
     text = QUOTES_FILE.read_text(encoding="utf-8")
     groups = parse(text)
+    sources = load_sources()
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_FILE.write_text(render(groups), encoding="utf-8")
+    OUTPUT_FILE.write_text(render(groups, sources), encoding="utf-8")
     total = sum(len(g["quotes"]) for g in groups)
     print(f"Wrote {OUTPUT_FILE}: {total} quotes from {len(groups)} sources")
 
