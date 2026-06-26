@@ -220,6 +220,7 @@ TEMPLATE = """<!doctype html>
     --muted: #8c877b;
     --faint: #c7c1b3;
     --rule: #e0dccf;
+    --card: #fffdf8;
     --serif-display: "Playfair Display", Georgia, "Times New Roman", serif;
     --serif-text: "Spectral", Georgia, "Iowan Old Style", serif;
     --sans: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -235,7 +236,7 @@ TEMPLATE = """<!doctype html>
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }}
-  .wrap {{ max-width: 760px; margin: 0 auto; padding: 14vh 28px 20vh; }}
+  .wrap {{ max-width: 960px; margin: 0 auto; padding: 14vh 28px 20vh; }}
 
   /* Masthead */
   .masthead {{ margin-bottom: 16vh; }}
@@ -290,22 +291,56 @@ TEMPLATE = """<!doctype html>
     white-space: nowrap;
   }}
 
-  /* Quotes */
-  .quotes {{ margin-top: 1rem; }}
+  /* Quotes — card grid */
+  .quotes {{
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }}
   .quote {{
     margin: 0;
-    padding: 4.5vh 0;
-    border-bottom: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    padding: 18px 26px 22px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    box-shadow: 0 14px 30px -24px rgba(24, 23, 18, 0.5);
   }}
-  .quote:last-child {{ border-bottom: none; }}
+  .card-top {{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }}
+  .qmark {{
+    font-family: var(--serif-display);
+    font-size: 5.2rem;
+    line-height: 0.8;
+    color: var(--ink);
+  }}
+  .arrow {{
+    width: 38px;
+    height: 38px;
+    margin-top: 14px;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: background 0.18s ease, color 0.18s ease;
+  }}
+  .arrow:hover {{ background: var(--ink); color: var(--card); }}
   blockquote {{
     margin: 0;
-    font-size: clamp(1.3rem, 2.6vw, 1.6rem);
-    line-height: 1.5;
+    font-size: clamp(1.1rem, 2vw, 1.18rem);
+    line-height: 1.45;
     text-wrap: pretty;
   }}
   .source {{
-    margin-top: 1.6rem;
+    margin-top: auto;
+    padding-top: 20px;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
@@ -328,7 +363,7 @@ TEMPLATE = """<!doctype html>
   .source .title {{
     font-family: var(--serif-text);
     font-style: italic;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     letter-spacing: 0;
     color: var(--muted);
   }}
@@ -351,8 +386,9 @@ TEMPLATE = """<!doctype html>
   }}
   footer code {{ font-family: var(--sans); font-style: italic; }}
 
-  @media (max-width: 600px) {{
+  @media (max-width: 700px) {{
     .wrap {{ padding: 9vh 20px 14vh; }}
+    .quotes {{ grid-template-columns: 1fr; }}
     .theme-head {{ grid-template-columns: 1fr auto; }}
     .theme-index {{ display: none; }}
   }}
@@ -364,6 +400,7 @@ TEMPLATE = """<!doctype html>
       --muted: #948f83;
       --faint: #4a463c;
       --rule: #2c2a23;
+      --card: #1c1a16;
     }}
   }}
 </style>
