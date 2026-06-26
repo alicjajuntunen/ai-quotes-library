@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-I",
+        "-c",
+        "import os, http.server, socketserver; os.chdir('/tmp/ai-quotes-preview'); socketserver.TCPServer.allow_reuse_address = True; socketserver.TCPServer(('127.0.0.1', 8137), http.server.SimpleHTTPRequestHandler).serve_forever()"
+      ],
+      "port": 8137
+    }
+  ]
+}

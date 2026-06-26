@@ -1,0 +1,216 @@
+<div id="xq-root">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap');
+  #xq-root {
+    --bg: transparent;
+    --ink: #1a1a18;
+    --muted: #888884;
+    --faint: #c6c5c1;
+    --rule: #e3e2de;
+    --card: #fcfcfb;
+    --accept: #2f6b4f;
+    --reject: #9a3b3b;
+    --serif-display: "Playfair Display", Georgia, "Times New Roman", serif;
+    --serif-text: "Spectral", Georgia, "Iowan Old Style", serif;
+    --sans: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--serif-text);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  #xq-root * { box-sizing: border-box; }
+  .xq-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1rem; padding-bottom: 1rem; margin-bottom: 1.4rem;
+    border-bottom: 1px solid var(--ink); flex-wrap: wrap;
+  }
+  .xq-title { font-family: var(--serif-display); font-size: 1.5rem; margin: 0; }
+  .xq-hint { font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--muted); }
+  .xq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .xq-grid { grid-template-columns: 1fr; } }
+  .xq-card {
+    display: flex; flex-direction: column; padding: 16px 20px 18px;
+    background: var(--card); border: 1px solid var(--rule);
+    transition: opacity .18s ease, border-color .18s ease, box-shadow .18s ease;
+    box-shadow: 0 14px 30px -26px rgba(24,23,18,.5);
+  }
+  .xq-card.is-accepted { border-color: var(--accept); box-shadow: 0 0 0 1px var(--accept); }
+  .xq-card.is-rejected { opacity: .42; }
+  .xq-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .xq-qmark { font-family: var(--serif-display); font-size: 3.4rem; line-height: .8; color: var(--ink); }
+  .xq-new {
+    font-family: var(--sans); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accept); border: 1px solid var(--accept); padding: 3px 7px; align-self: center;
+  }
+  .xq-quote { font-size: 1.04rem; line-height: 1.42; margin: .2rem 0 0; text-wrap: pretty; }
+  .xq-byline {
+    margin-top: 14px; font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .xq-byline .xq-author { text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink); }
+  .xq-byline .xq-role { font-family: var(--serif-text); font-style: italic; font-size: 0.92rem; letter-spacing: 0; }
+  .xq-theme-row { margin-top: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .xq-theme-label { font-family: var(--sans); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .xq-theme-row select, .xq-theme-row input {
+    font-family: var(--serif-text); font-size: 0.9rem; color: var(--ink); background: var(--bg);
+    border: 1px solid var(--rule); padding: 4px 6px; max-width: 100%;
+  }
+  .xq-newtheme { display: none; flex-basis: 100%; }
+  .xq-newtheme.show { display: block; }
+  .xq-actions { margin-top: auto; padding-top: 16px; display: flex; gap: 8px; }
+  .xq-btn {
+    flex: 1; font-family: var(--sans); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 9px 0; border: 1px solid var(--rule); background: var(--card); color: var(--muted); cursor: pointer;
+    transition: all .15s ease;
+  }
+  .xq-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .xq-card.is-accepted .xq-accept { background: var(--accept); border-color: var(--accept); color: #fff; }
+  .xq-card.is-rejected .xq-reject { background: var(--reject); border-color: var(--reject); color: #fff; }
+  .xq-foot {
+    position: sticky; bottom: 0; margin-top: 1.6rem; padding: 14px 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    border-top: 1px solid var(--ink); background: linear-gradient(transparent, var(--card) 40%);
+    flex-wrap: wrap;
+  }
+  .xq-count { font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); }
+  .xq-apply {
+    font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 11px 26px; border: 1px solid var(--ink); background: var(--ink); color: var(--card); cursor: pointer;
+    transition: opacity .15s ease;
+  }
+  .xq-apply:disabled { opacity: .32; cursor: not-allowed; }
+  .xq-done { font-family: var(--serif-display); font-style: italic; font-size: 1.3rem; padding: 1rem 0; }
+  @media (prefers-color-scheme: dark) {
+    #xq-root { --ink:#eae9e5; --muted:#918f8a; --faint:#46453f; --rule:#2a2a27; --card:#1b1b19;
+      --accept:#7fd1a3; --reject:#e08a8a; }
+  }
+</style>
+
+<div class="xq-head">
+  <h2 class="xq-title">Review extracted quotes</h2>
+  <span class="xq-hint">Accept the keepers · adjust a theme if needed · then Apply</span>
+</div>
+<div class="xq-grid" id="xq-grid"></div>
+<div class="xq-foot">
+  <span class="xq-count" id="xq-count"></span>
+  <button class="xq-apply" id="xq-apply" disabled>Apply 0 quotes</button>
+</div>
+
+<script>
+(function () {
+  const CANDIDATES = __CANDIDATES__;
+  const THEMES = __THEMES__;
+  const root = document.getElementById('xq-root');
+  const grid = document.getElementById('xq-grid');
+  const countEl = document.getElementById('xq-count');
+  const applyBtn = document.getElementById('xq-apply');
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+  // Union of existing themes plus any new ones proposed on candidates.
+  const themeSet = [];
+  THEMES.forEach(t => { if (!themeSet.includes(t)) themeSet.push(t); });
+  CANDIDATES.forEach(c => { if (c.theme && !themeSet.includes(c.theme)) themeSet.push(c.theme); });
+
+  const state = {}; // i -> { decision: 'undecided'|'accepted'|'rejected', theme, newTheme }
+
+  CANDIDATES.forEach(c => {
+    state[c.i] = { decision: 'undecided', theme: c.theme || (THEMES[0] || ''), newTheme: '' };
+
+    const card = document.createElement('div');
+    card.className = 'xq-card';
+    card.dataset.i = c.i;
+
+    const bylineBits = [];
+    if (c.author) bylineBits.push('<span class="xq-author">' + esc(c.author) + '</span>');
+    if (c.role) bylineBits.push('<span class="xq-role">' + esc(c.role) + '</span>');
+    if (c.title) bylineBits.push('<span class="xq-title-src">' + esc(c.title) + '</span>');
+
+    const opts = themeSet.map(t =>
+      '<option value="' + esc(t) + '"' + (t === c.theme ? ' selected' : '') + '>' + esc(t) + '</option>'
+    ).join('');
+
+    card.innerHTML =
+      '<div class="xq-card-top">' +
+        '<span class="xq-qmark" aria-hidden="true">&ldquo;</span>' +
+        (c.isNewTheme ? '<span class="xq-new">New theme</span>' : '') +
+      '</div>' +
+      '<p class="xq-quote">' + esc(c.text) + '</p>' +
+      '<div class="xq-byline">' + bylineBits.join(' · ') + '</div>' +
+      '<div class="xq-theme-row">' +
+        '<span class="xq-theme-label">Theme</span>' +
+        '<select class="xq-theme-sel">' + opts +
+          '<option value="__new__">＋ New theme…</option>' +
+        '</select>' +
+        '<input class="xq-newtheme" type="text" placeholder="Name the new theme" />' +
+      '</div>' +
+      '<div class="xq-actions">' +
+        '<button class="xq-btn xq-accept">Accept</button>' +
+        '<button class="xq-btn xq-reject">Reject</button>' +
+      '</div>';
+
+    const sel = card.querySelector('.xq-theme-sel');
+    const newInput = card.querySelector('.xq-newtheme');
+    sel.addEventListener('change', () => {
+      if (sel.value === '__new__') {
+        newInput.classList.add('show'); newInput.focus();
+        state[c.i].theme = '__new__';
+      } else {
+        newInput.classList.remove('show');
+        state[c.i].theme = sel.value;
+      }
+    });
+    newInput.addEventListener('input', () => { state[c.i].newTheme = newInput.value.trim(); });
+
+    card.querySelector('.xq-accept').addEventListener('click', () => setDecision(c.i, 'accepted'));
+    card.querySelector('.xq-reject').addEventListener('click', () => setDecision(c.i, 'rejected'));
+
+    grid.appendChild(card);
+  });
+
+  function setDecision(i, decision) {
+    const s = state[i];
+    s.decision = (s.decision === decision) ? 'undecided' : decision; // toggle off if re-clicked
+    const card = grid.querySelector('.xq-card[data-i="' + i + '"]');
+    card.classList.toggle('is-accepted', s.decision === 'accepted');
+    card.classList.toggle('is-rejected', s.decision === 'rejected');
+    refresh();
+  }
+
+  function accepted() {
+    return CANDIDATES.filter(c => state[c.i].decision === 'accepted');
+  }
+
+  function refresh() {
+    const acc = accepted();
+    const decided = CANDIDATES.filter(c => state[c.i].decision !== 'undecided').length;
+    countEl.textContent = acc.length + ' accepted · ' +
+      (CANDIDATES.length - decided) + ' undecided';
+    applyBtn.textContent = 'Apply ' + acc.length + (acc.length === 1 ? ' quote' : ' quotes');
+    applyBtn.disabled = acc.length === 0;
+  }
+
+  applyBtn.addEventListener('click', () => {
+    const acc = accepted();
+    if (!acc.length) return;
+    const lines = acc.map(c => {
+      const s = state[c.i];
+      let theme = s.theme;
+      if (theme === '__new__') theme = s.newTheme || 'Untitled theme';
+      const isNew = !THEMES.includes(theme);
+      return '- #' + c.i + ' → theme "' + theme + '"' + (isNew ? ' (new theme)' : '');
+    });
+    const msg =
+      'I reviewed the extracted quotes in the card UI. Apply these to Quotes.md, using ' +
+      'your own verbatim text for each numbered candidate:\n' + lines.join('\n') +
+      '\nSkip every candidate not listed above.';
+    sendPrompt(msg);
+    root.innerHTML = '<p class="xq-done">Applying ' + acc.length +
+      (acc.length === 1 ? ' quote' : ' quotes') + '…</p>';
+  });
+
+  refresh();
+})();
+</script>
+</div>
