@@ -1,0 +1,12 @@
+# Obsidian app state (rewritten constantly)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+**/.obsidian/workspace.json
+**/.obsidian/workspace-mobile.json
+.trash/
+
+# Source transcripts / raw text — not tracked
+Sources/
+
+# Generated site output (built by CI)
+dist/
