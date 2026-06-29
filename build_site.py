@@ -218,6 +218,7 @@ TEMPLATE = """<!doctype html>
     --faint: #c6c5c1;
     --rule: #e3e2de;
     --card: #fcfcfb;
+    --chip-text: #565550;
     --serif-display: "Playfair Display", Georgia, "Times New Roman", serif;
     --serif-text: "Spectral", Georgia, "Iowan Old Style", serif;
     --sans: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -283,7 +284,7 @@ TEMPLATE = """<!doctype html>
     letter-spacing: 0.1em;
     text-transform: uppercase;
     line-height: 1.3;
-    color: var(--muted);
+    color: var(--chip-text);
     text-align: right;
   }}
   blockquote {{
@@ -374,6 +375,7 @@ TEMPLATE = """<!doctype html>
       --faint: #46453f;
       --rule: #2a2a27;
       --card: #1b1b19;
+      --chip-text: #a7a59f;
     }}
   }}
 </style>
