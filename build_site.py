@@ -191,6 +191,30 @@ DONE_ICON = (
     'stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
     '<path d="M20 6 9 17l-5-5"/></svg>'
 )
+# Source-type glyphs prefixed to the byline so a quote's origin reads at a
+# glance: a camera for video sources, a globe for everything else on the web.
+VIDEO_ICON = (
+    '<svg class="src-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<rect x="3" y="4" width="18" height="14" rx="2"/>'
+    '<path d="M10 8.5l5 3-5 3z" fill="currentColor" stroke="none"/></svg>'
+)
+WEB_ICON = (
+    '<svg class="src-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/>'
+    '<path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>'
+)
+
+VIDEO_HOSTS = ("youtube.com", "youtu.be")
+
+
+def source_icon(url):
+    """Return the byline glyph for a source URL: video camera for known video
+    hosts, globe otherwise. Empty when there's no URL to classify."""
+    if not url:
+        return ""
+    return VIDEO_ICON if any(host in url for host in VIDEO_HOSTS) else WEB_ICON
 
 
 def copy_text(quote, source_meta):
@@ -228,11 +252,12 @@ def render_byline(quote, sources, source_meta):
     author = html.escape(meta.get("author") or quote["author"])
     role = html.escape(meta.get("role", ""))
     url = sources.get(quote["raw"])
+    icon = source_icon(url)
     if url:
         href = html.escape(url, quote=True)
         title = (
             f'<a class="title" href="{href}" target="_blank" rel="noopener">'
-            f'{html.escape(quote["title"])}</a>'
+            f'{icon}{html.escape(quote["title"])}</a>'
         )
     else:
         title = f'<span class="title">{html.escape(quote["title"])}</span>'
@@ -242,7 +267,11 @@ def render_byline(quote, sources, source_meta):
     if role:
         parts.append(f'<span class="role">{role}</span>')
     parts.append(title)
-    inner = '<span class="sep">·</span>'.join(parts)
+    # Each separator is glued to the end of the part it follows (one flex item
+    # per "part ·") so the byline only ever wraps *between* parts — a lone "·"
+    # can never get orphaned onto a new line with a leading gap before the title.
+    sep = '<span class="sep">·</span>'
+    inner = "".join(f'<span class="byl">{p}{sep}</span>' for p in parts[:-1]) + parts[-1]
     return f'<figcaption class="source">{inner}</figcaption>'
 
 
@@ -418,6 +447,14 @@ TEMPLATE = """<!doctype html>
     color: var(--muted);
   }}
   .source .sep {{ margin: 0 0.7em; color: var(--faint); }}
+  /* Source-type glyph sitting just before the source title. */
+  .src-icon {{
+    width: 0.95em;
+    height: 0.95em;
+    margin-right: 0.4em;
+    vertical-align: -0.14em;
+    flex: 0 0 auto;
+  }}
   a.title {{ text-decoration: none; transition: color 0.18s ease; }}
   a.title:hover {{ color: var(--ink); }}
 
