@@ -164,6 +164,9 @@ def render_card(quote, sources, source_meta):
         f'      <figure class="quote" data-copy="{html.escape(copy_text(quote, source_meta), quote=True)}">\n'
         f'        <div class="card-top">\n'
         f'          <span class="qmark" aria-hidden="true">&ldquo;</span>\n'
+        f"        </div>\n"
+        f'        <div class="copy-corner">\n'
+        f'          <span class="copy-flash" role="status" aria-live="polite"></span>\n'
         f'          <button class="copy-btn" type="button" aria-label="Copy quote" title="Copy quote">'
         f"{COPY_ICON}{DONE_ICON}</button>\n"
         f"        </div>\n"
@@ -249,6 +252,7 @@ TEMPLATE = """<!doctype html>
   /* Card (shared by fallback + canvas). In canvas mode the engine sets
      position/left/top/width inline; nothing here forces absolute positioning. */
   .quote {{
+    position: relative;
     margin: 0;
     width: 100%;
     display: flex;
@@ -265,6 +269,31 @@ TEMPLATE = """<!doctype html>
     align-items: flex-start;
     gap: 14px;
   }}
+  /* Copy control + its in-place confirmation, pinned to the card corner. */
+  .copy-corner {{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }}
+  .copy-flash {{
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    opacity: 0;
+    transform: translateX(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }}
+  .copy-corner:has(.copy-btn.copied) .copy-flash {{
+    opacity: 1;
+    transform: translateX(0);
+  }}
   .qmark {{
     font-family: var(--serif-display);
     font-size: 5.2rem;
@@ -273,7 +302,6 @@ TEMPLATE = """<!doctype html>
   }}
   .copy-btn {{
     flex: 0 0 auto;
-    margin-top: 0.4rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -303,37 +331,9 @@ TEMPLATE = """<!doctype html>
   .copy-btn.copied .i-copy {{ display: none; }}
   .copy-btn.copied .i-done {{ display: block; }}
 
-  /* Copy-confirmation toast, centered at the bottom of the viewport. */
-  #toast {{
-    position: fixed;
-    left: 50%;
-    bottom: 28px;
-    z-index: 50;
-    transform: translate(-50%, 12px);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-radius: 999px;
-    background: var(--ink);
-    color: var(--bg);
-    font-family: var(--sans);
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    box-shadow: 0 14px 34px -16px rgba(0, 0, 0, 0.55);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
-  }}
-  #toast.show {{
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, 0);
-  }}
-  #toast svg {{ width: 15px; height: 15px; display: block; }}
   @media (prefers-reduced-motion: reduce) {{
-    #toast {{ transition: opacity 0.22s ease, visibility 0.22s; transform: translate(-50%, 0); }}
+    .copy-flash {{ transition: opacity 0.18s ease; transform: none; }}
+    .copy-corner:has(.copy-btn.copied) .copy-flash {{ transform: none; }}
   }}
   blockquote {{
     margin: 0;
@@ -431,10 +431,6 @@ TEMPLATE = """<!doctype html>
   <main id="field">
 {body}
   </main>
-  <div id="toast" role="status" aria-live="polite">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-    <span>Quote copied</span>
-  </div>
   <script>
   (function () {{
     // Copy-to-clipboard, wired at document level via delegation so it covers
@@ -455,14 +451,6 @@ TEMPLATE = """<!doctype html>
       try {{ document.execCommand("copy"); }} catch (_) {{}}
       document.body.removeChild(ta);
     }}
-    var toast = document.getElementById("toast");
-    var toastTimer = 0;
-    function showToast() {{
-      if (!toast) return;
-      toast.classList.add("show");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(function () {{ toast.classList.remove("show"); }}, 1800);
-    }}
     document.addEventListener("click", function (e) {{
       var btn = e.target.closest && e.target.closest(".copy-btn");
       if (!btn) return;
@@ -470,13 +458,16 @@ TEMPLATE = """<!doctype html>
       var text = fig && fig.getAttribute("data-copy");
       if (!text) return;
       writeClipboard(text);
-      showToast();
+      var flash = btn.parentNode.querySelector(".copy-flash");
+      if (flash) flash.textContent = "Copied";
       btn.classList.add("copied");
       btn.setAttribute("aria-label", "Copied");
-      setTimeout(function () {{
+      clearTimeout(btn._copyTimer);
+      btn._copyTimer = setTimeout(function () {{
         btn.classList.remove("copied");
         btn.setAttribute("aria-label", "Copy quote");
-      }}, 1300);
+        if (flash) flash.textContent = "";
+      }}, 1400);
     }});
 
     var field = document.getElementById("field");
@@ -588,13 +579,26 @@ TEMPLATE = """<!doctype html>
     ty = -rnd() * (columns.length ? columns[0].hk : 600);
     apply();
 
+    // Card heights — and therefore every baked top — depend on the webfont.
+    // The first layout runs before Literata (display=swap) has loaded, so it
+    // measures fallback-font heights; once the real font swaps in each card
+    // grows and the frozen tops drift out of true, making gutters uneven. Lay
+    // out once more when the font is ready so positions match the final metrics.
+    if (document.fonts && document.fonts.ready) {{
+      document.fonts.ready.then(function () {{ layout(); apply(); }});
+    }}
+
     var dragging = false, lastX = 0, lastY = 0, lastT = 0;
     var startX = 0, startY = 0, moved = false;
 
     viewport.addEventListener("pointerdown", function (e) {{
+      // Reset the drag-distance flag for every press: otherwise a stale
+      // moved===true left over from the last canvas drag makes the capture-phase
+      // click suppressor (below) eat the next copy-button click.
+      moved = false;
       // Let the copy button receive a clean click instead of starting a drag.
       if (e.target.closest && e.target.closest(".copy-btn")) return;
-      dragging = true; moved = false;
+      dragging = true;
       try {{ viewport.setPointerCapture(e.pointerId); }} catch (_) {{}}
       startX = lastX = e.clientX; startY = lastY = e.clientY;
       lastT = performance.now(); vx = vy = 0;
