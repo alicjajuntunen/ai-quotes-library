@@ -116,6 +116,9 @@
   "Groktop - Duolingo's AI-First Disaster": {
     "author": "Magnus Hedemark"
   },
+  "Head of Growth (Anthropic) - Anthropic is automating its own growth": {
+    "role": "Head of Growth, Anthropic"
+  },
   "How Anthropic, Every, & Ramp design with AI": {
     "author": "Ridd (Michael Riddering)",
     "role": "Founder, Dive Club"
@@ -264,6 +267,10 @@
     "author": "Max Schoening",
     "role": "Head of Product, Notion"
   },
+  "McKinsey - Rewiring software delivery for the agentic era": {
+    "author": "Jared Moon, Rory Walsh & Vito Di Leo",
+    "role": "Partners, McKinsey"
+  },
   "Microsoft - Guidelines for Human-AI Interaction": {
     "author": "Microsoft Research"
   },
@@ -330,6 +337,17 @@
   "The internal AI tool that's transforming how Stripe designs products - Owen Williams": {
     "author": "Owen Williams",
     "role": "Design Manager, Stripe"
+  },
+  "The most rational take on AI you'll hear this year": {
+    "author": "Benedict Evans",
+    "role": "Independent analyst; ex-a16z"
+  },
+  "Thoughtworks - AI works Agentic Development Platform": {
+    "author": "Thoughtworks"
+  },
+  "Thoughtworks - Preparing your team for the agentic SDLC": {
+    "author": "Dirk Lässig",
+    "role": "Thoughtworks"
   },
   "Tommy Geoco - The state of the design industry right now": {
     "author": "Tommy Geoco",

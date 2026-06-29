@@ -145,6 +145,12 @@
 > "I think my babysitting days are largely over with AI. Not completely over, I'm still babysitting a branch right now, but largely over with AI."
 > — [[I let Codex run for 6 hours. Here's what happened]]
 
+> "Professional value moves from syntax mastery to problem definition. The ideal developer transforms from the 'hero developer' to the 'system thinker'."
+> — [[Thoughtworks - Preparing your team for the agentic SDLC]]
+
+> "The role of humans is evolving from 'human-in-the-loop' to 'human-on-the-loop'... Humans will look after the agentic workflow performance and reliability rather than reviewing every single change."
+> — [[Thoughtworks - Preparing your team for the agentic SDLC]]
+
 
 ## Agency is the new advantage
 
@@ -183,6 +189,9 @@
 
 > "The key skill in getting the most out of LLMs is learning to work with tech that is both inherently unreliable and incredibly powerful at the same time."
 > — [[Simon Willison - Things we learned about LLMs in 2024]]
+
+> "Like humans, agents make mistakes (hallucinate) and operate within 'cognitive' limits (context windows). Humans have long mastered the art of building reliable systems from fallible human logic using sophisticated processes and methods like iterating, pairing, reviewing, testing and so forth."
+> — [[Thoughtworks - Preparing your team for the agentic SDLC]]
 
 
 ## Augment, don't replace
