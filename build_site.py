@@ -209,7 +209,7 @@ TEMPLATE = """<!doctype html>
 <meta name="description" content="A curated collection of notable quotes about AI, design, and craft.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
   :root {{
     --bg: #f3f3f1;
@@ -219,8 +219,8 @@ TEMPLATE = """<!doctype html>
     --rule: #e3e2de;
     --card: #fcfcfb;
     --chip-text: #565550;
-    --serif-display: "Playfair Display", Georgia, "Times New Roman", serif;
-    --serif-text: "Spectral", Georgia, "Iowan Old Style", serif;
+    --serif-display: "Literata", Georgia, "Times New Roman", serif;
+    --serif-text: "Literata", Georgia, "Iowan Old Style", serif;
     --sans: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }}
   * {{ box-sizing: border-box; }}
