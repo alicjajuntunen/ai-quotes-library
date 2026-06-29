@@ -67,7 +67,54 @@ def parse(text):
     return quotes
 
 
+URL_RE = re.compile(r"https?://\S+")
+
+
+def scan_source_urls():
+    """Scan Sources/ for {file-stem: url}, reading the URL line per source file.
+
+    Each source file is `--- frontmatter --- / <URL line> / blank / body`. We
+    take the first URL on the first non-empty line after the frontmatter block,
+    so a stray link buried in a transcript can't be mistaken for the source URL.
+    Returns {} when Sources/ is absent (e.g. on CI, where transcripts are
+    gitignored)."""
+    urls = {}
+    if not SOURCES_DIR.exists():
+        return urls
+    for path in SOURCES_DIR.rglob("*.md"):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        i = 0
+        if lines and lines[0].strip() == "---":
+            i = 1
+            while i < len(lines) and lines[i].strip() != "---":
+                i += 1
+            i += 1
+        for line in lines[i:]:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            match = URL_RE.search(stripped)
+            if match:
+                urls[path.stem] = match.group(0).rstrip('">).,')
+            break  # only the first content line after frontmatter is the URL line
+    return urls
+
+
 def load_sources():
+    """Return {file-stem: url} for linking quotes to their original source.
+
+    Mirrors load_source_meta: when Sources/ is present (local builds) we scan
+    the URL line out of each file and refresh the tracked sources.json sidecar
+    from it; on CI (Sources/ absent) we fall back to that committed sidecar, so
+    links still render on the deployed site. This keeps sources.json in sync
+    automatically instead of by hand."""
+    urls = scan_source_urls()
+    if urls:
+        SOURCES_FILE.write_text(
+            json.dumps(urls, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        return urls
     if SOURCES_FILE.exists():
         return json.loads(SOURCES_FILE.read_text(encoding="utf-8"))
     return {}
@@ -596,8 +643,11 @@ TEMPLATE = """<!doctype html>
       // moved===true left over from the last canvas drag makes the capture-phase
       // click suppressor (below) eat the next copy-button click.
       moved = false;
-      // Let the copy button receive a clean click instead of starting a drag.
-      if (e.target.closest && e.target.closest(".copy-btn")) return;
+      // Let the copy button and source links receive a clean click instead of
+      // starting a drag. setPointerCapture (below) retargets the click to the
+      // viewport, so anything that relies on the click reaching its own element
+      // — the delegated copy handler, an <a>'s native navigation — must skip it.
+      if (e.target.closest && e.target.closest(".copy-btn, a[href]")) return;
       dragging = true;
       try {{ viewport.setPointerCapture(e.pointerId); }} catch (_) {{}}
       startX = lastX = e.clientX; startY = lastY = e.clientY;

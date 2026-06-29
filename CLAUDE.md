@@ -32,10 +32,13 @@ that vault root:
   `author`/`role` frontmatter, then the URL line, a blank line, and the transcript/body. Match
   the existing folder-per-publication grouping rather than inventing a flat structure. The site
   build (`build_site.py`) reads `author`/`role` from this frontmatter — only the frontmatter,
-  never the transcript — to attribute each quote. Because `Sources/` is gitignored, the build
-  also writes a tracked `authors.json` sidecar from that frontmatter; CI (which has no
-  `Sources/`) renders roles from it. So after adding/editing a source's `author`/`role`, run
-  `python3 build_site.py` and commit the updated `authors.json` for roles to reach the live site.
+  never the transcript — to attribute each quote, and reads the URL line (the first content line
+  after the frontmatter) to link each quote to its original source. Because `Sources/` is
+  gitignored, the build writes two tracked sidecars from the source files: `authors.json` (from
+  the `author`/`role` frontmatter) and `sources.json` (the `{Author - Title: URL}` map). CI
+  (which has no `Sources/`) renders roles and source links from these. So after adding/editing a
+  source's frontmatter or URL line, run `python3 build_site.py` and commit the updated
+  `authors.json` **and** `sources.json` for roles and links to reach the live site.
 - **Extracting a quote:** pull the verbatim text into `Quotes.md` and attribute it back to
   its source. Use Obsidian-style wiki-links (`[[Author - Title]]`) so backlinks and the graph
   view connect quotes to their origin — the `backlink`, `outgoing-link`, and `graph` plugins

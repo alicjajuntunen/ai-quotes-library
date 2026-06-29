@@ -16,6 +16,3 @@ dist/
 
 # Local planning / spec docs (superpowers output)
 docs/
-
-# Generated source index (rebuilt by build_site.py; not needed by CI)
-sources.json
