@@ -550,9 +550,10 @@ TEMPLATE = """<!doctype html>
     viewport.appendChild(world);
 
     var TILE_W = 0;
-    var tx = 0, ty = 0, vx = 0, vy = 0;
-    var raf = 0;
+    var tx = 0, ty = 0, vx = 0, vy = 0;  // vx/vy are velocities in px per second
+    var raf = 0, prevFrame = 0;
     var columns = [];  // per column: {{ hk, els: [container elements] }}
+    var centers = [];  // per card: {{ cx, cy, hk }} — its centre in world coords
 
     // Lay cards into independent columns. Each column tiles vertically by its own
     // height (with a trailing gutter), and the columns tile horizontally by TILE_W,
@@ -560,6 +561,7 @@ TEMPLATE = """<!doctype html>
     function layout() {{
       world.innerHTML = "";
       columns = [];
+      centers = [];
       var colW = cardWidth();
       var colCount = Math.max(3, Math.min(6, Math.round(Math.sqrt(cards.length))));
       TILE_W = colCount * (colW + GUTTER);
@@ -580,6 +582,11 @@ TEMPLATE = """<!doctype html>
       var DI = Math.ceil(vw / TILE_W);  // horizontal copies to cover the viewport
       for (var ci2 = 0; ci2 < colCount; ci2++) {{
         var hk = colH[ci2] || (vh + GUTTER);
+        var colCx = ci2 * (colW + GUTTER) + colW / 2;
+        for (var mc = 0; mc < colCards[ci2].length; mc++) {{
+          var ic = colCards[ci2][mc];
+          centers.push({{ cx: colCx, cy: ic.y + ic.card.offsetHeight / 2, hk: hk }});
+        }}
         var K = Math.max(1, Math.ceil(vh / hk));  // vertical copies per column
         var els = [];
         for (var di = 0; di <= DI; di++) {{
@@ -619,11 +626,32 @@ TEMPLATE = """<!doctype html>
       }}
     }}
 
+    // Signed distance from v to the nearest multiple of m, in (-m/2, m/2].
+    function modc(v, m) {{ if (!(m > 0)) return 0; return v - m * Math.round(v / m); }}
+    // {{dx, dy}} that slides the on-screen card instance nearest the viewport
+    // centre exactly onto it. The field is periodic — TILE_W across, hk down
+    // each column — so a copy of every card always sits within one period of
+    // centre, and shifting tx/ty by this delta lands one dead-centre.
+    function nearest() {{
+      var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      var bd = Infinity, bdx = 0, bdy = 0;
+      for (var i = 0; i < centers.length; i++) {{
+        var c = centers[i];
+        var ox = modc(c.cx + tx - cx, TILE_W);
+        var oy = modc(c.cy + ty - cy, c.hk);
+        var d = ox * ox + oy * oy;
+        if (d < bd) {{ bd = d; bdx = -ox; bdy = -oy; }}
+      }}
+      return {{ dx: bdx, dy: bdy }};
+    }}
+    function centerNow() {{ var n = nearest(); tx += n.dx; ty += n.dy; }}
+
     document.body.appendChild(viewport);
     document.body.classList.add("canvas");
     layout();
     tx = -rnd() * TILE_W;
     ty = -rnd() * (columns.length ? columns[0].hk : 600);
+    centerNow();  // open resting on a centred quote
     apply();
 
     // Card heights — and therefore every baked top — depend on the webfont.
@@ -632,11 +660,23 @@ TEMPLATE = """<!doctype html>
     // grows and the frozen tops drift out of true, making gutters uneven. Lay
     // out once more when the font is ready so positions match the final metrics.
     if (document.fonts && document.fonts.ready) {{
-      document.fonts.ready.then(function () {{ layout(); apply(); }});
+      document.fonts.ready.then(function () {{
+        layout();
+        if (!dragging && !raf) centerNow();
+        apply();
+      }});
     }}
 
     var dragging = false, lastX = 0, lastY = 0, lastT = 0;
     var startX = 0, startY = 0, moved = false;
+
+    // Magnet tuning. PULL is the fraction of the remaining offset closed per
+    // 1/60 s at full strength; it eases to zero as speed approaches PULL_SPEED
+    // (px/s) so fast flings stay free and only slow motion gets centred.
+    // MOM_DECAY is the inertia retained per 1/60 s after release. All three are
+    // expressed per-60fps-frame and rescaled by real elapsed time each frame,
+    // so the feel is identical on 60 Hz and 120 Hz displays.
+    var PULL = 0.16, PULL_SPEED = 1300, MOM_DECAY = 0.94;
 
     viewport.addEventListener("pointerdown", function (e) {{
       // Reset the drag-distance flag for every press: otherwise a stale
@@ -652,8 +692,8 @@ TEMPLATE = """<!doctype html>
       try {{ viewport.setPointerCapture(e.pointerId); }} catch (_) {{}}
       startX = lastX = e.clientX; startY = lastY = e.clientY;
       lastT = performance.now(); vx = vy = 0;
-      if (raf) cancelAnimationFrame(raf);
       viewport.classList.add("grabbing");
+      if (!reduce) startLoop();  // run the magnet for the gentle in-drag pull
     }});
 
     viewport.addEventListener("pointermove", function (e) {{
@@ -661,7 +701,10 @@ TEMPLATE = """<!doctype html>
       var dx = e.clientX - lastX, dy = e.clientY - lastY;
       tx += dx; ty += dy;
       var now = performance.now(), dt = now - lastT || 16;
-      vx = (dx / dt) * 16; vy = (dy / dt) * 16;
+      // Track velocity in px/s, lightly smoothed so a jittery trackpad doesn't
+      // turn into a jittery fling on release.
+      var nvx = (dx / dt) * 1000, nvy = (dy / dt) * 1000;
+      vx = vx * 0.4 + nvx * 0.6; vy = vy * 0.4 + nvy * 0.6;
       lastX = e.clientX; lastY = e.clientY; lastT = now;
       if (Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > 6) moved = true;
       apply();
@@ -672,17 +715,48 @@ TEMPLATE = """<!doctype html>
       dragging = false;
       viewport.classList.remove("grabbing");
       try {{ viewport.releasePointerCapture(e.pointerId); }} catch (_) {{}}
-      if (!reduce) momentum();
+      if (reduce) {{ centerNow(); apply(); }}  // reduced motion: settle instantly
+      else startLoop();
     }}
     viewport.addEventListener("pointerup", endDrag);
     viewport.addEventListener("pointercancel", endDrag);
 
-    function momentum() {{
-      if (Math.abs(vx) < 0.1 && Math.abs(vy) < 0.1) return;
-      tx += vx; ty += vy; vx *= 0.94; vy *= 0.94;
+    // One unified loop drives both the in-drag magnet assist and the post-release
+    // inertia-plus-settle. The pull toward the nearest quote's centre is blended
+    // with motion: nearly absent while flinging fast, firm as things slow, so the
+    // canvas always comes to rest with a quote dead-centre.
+    function tick(now) {{
+      var dt = prevFrame ? Math.min((now - prevFrame) / 1000, 0.05) : 1 / 60;
+      prevFrame = now;
+      var frames = dt * 60;
+      var speed;
+      if (dragging) {{
+        // The finger owns position (set in pointermove); bleed the tracked
+        // velocity toward zero so pausing mid-drag lets the magnet take hold and
+        // gently centre a quote under the finger.
+        var hold = Math.pow(0.0001, dt);
+        vx *= hold; vy *= hold;
+        speed = Math.sqrt(vx * vx + vy * vy);
+      }} else {{
+        tx += vx * dt; ty += vy * dt;          // inertia
+        var md = Math.pow(MOM_DECAY, frames);
+        vx *= md; vy *= md;
+        speed = Math.sqrt(vx * vx + vy * vy);
+      }}
+      var t = Math.min(1, speed / PULL_SPEED);
+      var ease = (1 - t) * (1 - t);             // smooth falloff, no hard kink
+      var kEff = 1 - Math.pow(1 - PULL * ease, frames);
+      var n = nearest();
+      tx += n.dx * kEff; ty += n.dy * kEff;
       apply();
-      raf = requestAnimationFrame(momentum);
+      if (dragging || speed > 2 || Math.abs(n.dx) > 0.3 || Math.abs(n.dy) > 0.3) {{
+        raf = requestAnimationFrame(tick);
+      }} else {{
+        centerNow(); apply();                   // exact final settle
+        raf = 0; prevFrame = 0;
+      }}
     }}
+    function startLoop() {{ if (!raf) {{ prevFrame = 0; raf = requestAnimationFrame(tick); }} }}
 
     viewport.addEventListener("click", function (e) {{
       if (moved) {{ e.preventDefault(); e.stopPropagation(); }}
@@ -694,6 +768,7 @@ TEMPLATE = """<!doctype html>
       rt = setTimeout(function () {{
         rnd = mulberry32(seed);
         layout();
+        if (!dragging && !raf) centerNow();
         apply();
       }}, 200);
     }});
