@@ -18,6 +18,7 @@ transcripts under Sources/ are never published.
 import html
 import json
 import re
+from itertools import chain, zip_longest
 from pathlib import Path
 
 QUOTES_FILE = Path("AI quotes library/Quotes.md")
@@ -68,6 +69,16 @@ def parse(text):
             if body:
                 pending.append(body)
     return [t for t in themes if t["quotes"]]
+
+
+def interleave(themes):
+    """Flatten themes into one [(quote, theme_name)] list, round-robin across
+    themes so same-theme quotes are spread out across the canvas rather than
+    clustered. Quotes.md is grouped by theme, so naive source order would put a
+    theme's quotes adjacent; taking one quote from each theme per round mixes them.
+    """
+    columns = [[(q, t["theme"]) for q in t["quotes"]] for t in themes]
+    return [item for item in chain.from_iterable(zip_longest(*columns)) if item is not None]
 
 
 def load_sources():
