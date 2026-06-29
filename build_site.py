@@ -670,13 +670,19 @@ TEMPLATE = """<!doctype html>
     var dragging = false, lastX = 0, lastY = 0, lastT = 0;
     var startX = 0, startY = 0, moved = false;
 
-    // Magnet tuning. PULL is the fraction of the remaining offset closed per
-    // 1/60 s at full strength; it eases to zero as speed approaches PULL_SPEED
-    // (px/s) so fast flings stay free and only slow motion gets centred.
-    // MOM_DECAY is the inertia retained per 1/60 s after release. All three are
-    // expressed per-60fps-frame and rescaled by real elapsed time each frame,
-    // so the feel is identical on 60 Hz and 120 Hz displays.
-    var PULL = 0.16, PULL_SPEED = 1300, MOM_DECAY = 0.94;
+    // Magnet tuning, all rescaled by real elapsed time each frame so the feel is
+    // identical on 60 Hz and 120 Hz displays.
+    //   MOM_DECAY  — inertia retained per 1/60 s during the free glide.
+    //   COMMIT_V   — once the glide slows below this (px/s) we lock onto the
+    //                nearest quote and spring to it; above it motion stays free.
+    //   OMEGA      — spring stiffness (rad/s). Critically damped, so it eases in
+    //                and out and never overshoots/oscillates — the un-snappy part.
+    //   DRAG_PULL / DRAG_V — a soft assist while dragging: it only wakes up below
+    //                DRAG_V (px/s), so steady panning tracks the finger 1:1 and a
+    //                pause lets the nearest quote drift gently to centre.
+    var MOM_DECAY = 0.94, COMMIT_V = 300, OMEGA = 8.5;
+    var DRAG_PULL = 0.05, DRAG_V = 240;
+    var committed = false, targetTx = 0, targetTy = 0;
 
     viewport.addEventListener("pointerdown", function (e) {{
       // Reset the drag-distance flag for every press: otherwise a stale
@@ -692,6 +698,7 @@ TEMPLATE = """<!doctype html>
       try {{ viewport.setPointerCapture(e.pointerId); }} catch (_) {{}}
       startX = lastX = e.clientX; startY = lastY = e.clientY;
       lastT = performance.now(); vx = vy = 0;
+      committed = false;  // grabbing again drops any in-flight spring target
       viewport.classList.add("grabbing");
       if (!reduce) startLoop();  // run the magnet for the gentle in-drag pull
     }});
@@ -704,7 +711,7 @@ TEMPLATE = """<!doctype html>
       // Track velocity in px/s, lightly smoothed so a jittery trackpad doesn't
       // turn into a jittery fling on release.
       var nvx = (dx / dt) * 1000, nvy = (dy / dt) * 1000;
-      vx = vx * 0.4 + nvx * 0.6; vy = vy * 0.4 + nvy * 0.6;
+      vx = vx * 0.5 + nvx * 0.5; vy = vy * 0.5 + nvy * 0.5;
       lastX = e.clientX; lastY = e.clientY; lastT = now;
       if (Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > 6) moved = true;
       apply();
@@ -721,40 +728,60 @@ TEMPLATE = """<!doctype html>
     viewport.addEventListener("pointerup", endDrag);
     viewport.addEventListener("pointercancel", endDrag);
 
-    // One unified loop drives both the in-drag magnet assist and the post-release
-    // inertia-plus-settle. The pull toward the nearest quote's centre is blended
-    // with motion: nearly absent while flinging fast, firm as things slow, so the
-    // canvas always comes to rest with a quote dead-centre.
+    // The motion loop. Three smooth regimes, no abrupt hand-offs:
+    //   dragging  — the finger owns position; a soft spring only assists once you
+    //               slow below DRAG_V, so steady panning is 1:1 and a pause drifts
+    //               the nearest quote to centre.
+    //   gliding   — after release, free inertia (no pull) until it slows to
+    //               COMMIT_V, at which point we lock onto the nearest quote.
+    //   settling  — a critically-damped spring eases into that committed quote and
+    //               stops. Critical damping means it never overshoots or buzzes,
+    //               which is what kills the old snap/jitter.
     function tick(now) {{
       var dt = prevFrame ? Math.min((now - prevFrame) / 1000, 0.05) : 1 / 60;
       prevFrame = now;
       var frames = dt * 60;
-      var speed;
+
       if (dragging) {{
-        // The finger owns position (set in pointermove); bleed the tracked
-        // velocity toward zero so pausing mid-drag lets the magnet take hold and
-        // gently centre a quote under the finger.
-        var hold = Math.pow(0.0001, dt);
+        // Idle velocity bleeds off so a held pause wakes the assist.
+        var hold = Math.pow(0.02, dt);
         vx *= hold; vy *= hold;
-        speed = Math.sqrt(vx * vx + vy * vy);
-      }} else {{
-        tx += vx * dt; ty += vy * dt;          // inertia
+        var dspeed = Math.sqrt(vx * vx + vy * vy);
+        var gate = Math.max(0, 1 - dspeed / DRAG_V);
+        var kEff = (1 - Math.pow(1 - DRAG_PULL, frames)) * gate * gate;
+        if (kEff > 0) {{ var nd = nearest(); tx += nd.dx * kEff; ty += nd.dy * kEff; }}
+        apply();
+        raf = requestAnimationFrame(tick);
+        return;
+      }}
+
+      if (!committed) {{
+        tx += vx * dt; ty += vy * dt;            // free inertia glide
         var md = Math.pow(MOM_DECAY, frames);
         vx *= md; vy *= md;
-        speed = Math.sqrt(vx * vx + vy * vy);
+        if (Math.sqrt(vx * vx + vy * vy) < COMMIT_V) {{
+          var n = nearest();                     // lock onto one quote, once
+          targetTx = tx + n.dx; targetTy = ty + n.dy;
+          committed = true;
+        }}
       }}
-      var t = Math.min(1, speed / PULL_SPEED);
-      var ease = (1 - t) * (1 - t);             // smooth falloff, no hard kink
-      var kEff = 1 - Math.pow(1 - PULL * ease, frames);
-      var n = nearest();
-      tx += n.dx * kEff; ty += n.dy * kEff;
+
+      if (committed) {{
+        // Critically-damped spring (damping = 2*sqrt(stiffness)) toward the target.
+        var ex = tx - targetTx, ey = ty - targetTy;
+        vx += (-OMEGA * OMEGA * ex - 2 * OMEGA * vx) * dt;
+        vy += (-OMEGA * OMEGA * ey - 2 * OMEGA * vy) * dt;
+        tx += vx * dt; ty += vy * dt;
+        if (Math.abs(tx - targetTx) < 0.3 && Math.abs(ty - targetTy) < 0.3 &&
+            Math.sqrt(vx * vx + vy * vy) < 4) {{
+          tx = targetTx; ty = targetTy; apply();
+          committed = false; raf = 0; prevFrame = 0;
+          return;
+        }}
+      }}
+
       apply();
-      if (dragging || speed > 2 || Math.abs(n.dx) > 0.3 || Math.abs(n.dy) > 0.3) {{
-        raf = requestAnimationFrame(tick);
-      }} else {{
-        centerNow(); apply();                   // exact final settle
-        raf = 0; prevFrame = 0;
-      }}
+      raf = requestAnimationFrame(tick);
     }}
     function startLoop() {{ if (!raf) {{ prevFrame = 0; raf = requestAnimationFrame(tick); }} }}
 
