@@ -224,6 +224,7 @@ TEMPLATE = """<!doctype html>
   }}
   * {{ box-sizing: border-box; }}
   html {{ -webkit-text-size-adjust: 100%; }}
+  html, body {{ height: 100%; }}
   body {{
     margin: 0;
     background: var(--bg);
@@ -233,67 +234,22 @@ TEMPLATE = """<!doctype html>
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }}
-  .wrap {{ max-width: 960px; margin: 0 auto; padding: 14vh 28px 20vh; }}
 
-  /* Masthead */
-  .masthead {{ margin-bottom: 16vh; }}
-  h1 {{
-    margin: 0;
-    font-family: var(--serif-display);
-    font-weight: 400;
-    font-size: clamp(2.8rem, 9vw, 5rem);
-    line-height: 1.02;
-    letter-spacing: -0.015em;
+  /* No-JS fallback: a plain, readable, centered column of every quote. */
+  #field {{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 8vh 24px 12vh;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
   }}
 
-  /* Theme sections */
-  .theme {{ margin-top: 15vh; }}
-  .theme:first-of-type {{ margin-top: 0; }}
-  .theme-head {{
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: baseline;
-    column-gap: 1.2rem;
-    padding-bottom: 1.8rem;
-    cursor: pointer;
-    list-style: none;
-  }}
-  .theme-head::-webkit-details-marker {{ display: none; }}
-  .theme-head:focus-visible {{
-    outline: 2px solid var(--ink);
-    outline-offset: 4px;
-  }}
-  .theme-toggle {{
-    align-self: center;
-    width: 0.6rem;
-    height: 0.6rem;
-    border-right: 1.5px solid var(--muted);
-    border-bottom: 1.5px solid var(--muted);
-    transform: rotate(45deg);
-    transform-origin: center;
-    transition: transform 0.2s ease, border-color 0.18s ease;
-  }}
-  .theme[open] .theme-toggle {{ transform: rotate(-135deg); }}
-  .theme-head:hover .theme-toggle {{ border-color: var(--ink); }}
-  .theme-name {{
-    margin: 0;
-    font-family: var(--serif-display);
-    font-weight: 400;
-    font-size: clamp(1.6rem, 4.2vw, 2.4rem);
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-  }}
-
-  /* Quotes — card grid */
-  .quotes {{
-    margin-top: 2.5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
-    align-items: stretch;
-  }}
+  /* Card (shared by fallback + canvas). In canvas mode the engine sets
+     position/left/top/width inline; nothing here forces absolute positioning. */
   .quote {{
     margin: 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
     padding: 24px 28px 26px;
@@ -304,14 +260,31 @@ TEMPLATE = """<!doctype html>
   }}
   .card-top {{
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: flex-start;
+    gap: 14px;
   }}
   .qmark {{
     font-family: var(--serif-display);
     font-size: 5.2rem;
     line-height: 0.8;
     color: var(--ink);
+  }}
+  .chip {{
+    flex: 0 1 auto;
+    max-width: 60%;
+    margin-top: 0.5rem;
+    padding: 4px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--bg);
+    font-family: var(--sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.3;
+    color: var(--muted);
+    text-align: right;
   }}
   blockquote {{
     margin: 0;
@@ -349,26 +322,48 @@ TEMPLATE = """<!doctype html>
     color: var(--muted);
   }}
   .source .sep {{ margin: 0 0.7em; color: var(--faint); }}
-  a.title {{
-    text-decoration: none;
-    transition: color 0.18s ease;
-  }}
+  a.title {{ text-decoration: none; transition: color 0.18s ease; }}
   a.title:hover {{ color: var(--ink); }}
 
-  footer {{
-    margin-top: 18vh;
-    padding-top: 3rem;
-    border-top: 1px solid var(--rule);
-    font-family: var(--sans);
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    color: var(--muted);
+  /* Canvas mode (added to <body> by the engine once it is set up). */
+  body.canvas {{ overflow: hidden; }}
+  /* Keep the source cards in the DOM but off-screen so the engine can measure
+     them and so screen readers still reach the originals; clones fill the world. */
+  body.canvas #field {{
+    position: absolute;
+    visibility: hidden;
+    left: -100000px;
+    top: 0;
+    width: auto;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    height: 0;
+    overflow: hidden;
   }}
-  footer code {{ font-family: var(--sans); font-style: italic; }}
+  #viewport {{
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }}
+  #viewport.grabbing {{ cursor: grabbing; }}
+  #world {{ position: absolute; top: 0; left: 0; will-change: transform; }}
+  body.canvas #world .quote {{
+    position: absolute;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+  }}
+  body.canvas #world .quote:hover {{
+    transform: translateY(-4px);
+    box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.38);
+    z-index: 5;
+  }}
 
-  @media (max-width: 700px) {{
-    .wrap {{ padding: 9vh 20px 14vh; }}
-    .quotes {{ gap: 18px; }}
+  @media (prefers-reduced-motion: reduce) {{
+    body.canvas #world .quote {{ transition: none; }}
   }}
 
   @media (prefers-color-scheme: dark) {{
@@ -384,17 +379,9 @@ TEMPLATE = """<!doctype html>
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="masthead">
-      <h1>AI Quotes Library</h1>
-    </header>
-    <main>
+  <main id="field">
 {body}
-    </main>
-    <footer>
-      Curated collection. Built from <code>Quotes.md</code>.
-    </footer>
-  </div>
+  </main>
 </body>
 </html>
 """
