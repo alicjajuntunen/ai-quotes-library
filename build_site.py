@@ -147,12 +147,21 @@ def strip_quotes(text):
     return text
 
 
-def render_cardtop(quote, sources):
-    """Top row of a card: just the big quote-mark glyph."""
+def render_card(quote, theme, sources, source_meta):
+    """One self-contained quote card: theme chip + quote glyph + quote + byline.
+
+    The theme is shown as a small chip (it is a label, not a control); themes do
+    not drive layout. data-theme is also set for SEO / future use.
+    """
     return (
-        f'<div class="card-top">'
-        f'<span class="qmark" aria-hidden="true">&ldquo;</span>'
-        f"</div>"
+        f'      <figure class="quote" data-theme="{html.escape(theme, quote=True)}">\n'
+        f'        <div class="card-top">\n'
+        f'          <span class="qmark" aria-hidden="true">&ldquo;</span>\n'
+        f'          <span class="chip">{html.escape(theme)}</span>\n'
+        f"        </div>\n"
+        f'        <blockquote>{html.escape(strip_quotes(quote["text"]))}</blockquote>\n'
+        f"        {render_byline(quote, sources, source_meta)}\n"
+        f"      </figure>"
     )
 
 
@@ -180,32 +189,13 @@ def render_byline(quote, sources, source_meta):
 
 
 def render(themes, sources, source_meta):
-    total = sum(len(t["quotes"]) for t in themes)
-    sections = []
-    for t in themes:
-        entries = "\n".join(
-            f'          <figure class="quote">\n'
-            f"            {render_cardtop(q, sources)}\n"
-            f'            <blockquote>{html.escape(strip_quotes(q["text"]))}</blockquote>\n'
-            f"            {render_byline(q, sources, source_meta)}\n"
-            f"          </figure>"
-            for q in t["quotes"]
-        )
-        sections.append(
-            f'      <details class="theme" open>\n'
-            f'        <summary class="theme-head">\n'
-            f'          <h2 class="theme-name">{html.escape(t["theme"])}</h2>\n'
-            f'          <span class="theme-toggle" aria-hidden="true"></span>\n'
-            f"        </summary>\n"
-            f'        <div class="quotes">\n'
-            f"{entries}\n"
-            f"        </div>\n"
-            f"      </details>"
-        )
-    body = "\n".join(sections)
+    pool = interleave(themes)
+    cards = "\n".join(
+        render_card(quote, theme, sources, source_meta) for quote, theme in pool
+    )
     return TEMPLATE.format(
-        body=body,
-        total=total,
+        body=cards,
+        total=len(pool),
         themes=len(themes),
     )
 
