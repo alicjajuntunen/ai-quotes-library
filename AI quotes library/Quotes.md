@@ -52,7 +52,7 @@
 > "Product building and code writing now looks like carving rather than constructing. So it's very fast to create something that has too many features and too many buttons and too much code and you need to spend a lot of time removing stuff."
 > — [[Braintrust CEO - Evals are the new PRD for AI products]]
 
-> "resist the tools. Don't listen to the tools when they tell you that, you know, what you've created first time is good enough, and push for that extra 5% because that's the thing that actually makes your ideas stand above everyone else's."
+> "resist the tools. Don't listen to the tools when they tell you that what you've created first time is good enough, and push for that extra 5% because that's the thing that actually makes your ideas stand above everyone else's."
 > — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
 
 > "AI is really great at building stuff that looks polished but it's full of holes and that kind of feedback is so important to get early on."
@@ -103,7 +103,7 @@
 > "People are unconstrained by execution and they can take a good idea that adds value to them and build it and make it real and not just make it real, make it production ready."
 > — [[How to build an iPhone app with zero technical skills]]
 
-> "I think the hardest thing for PMs is often they can't like manifest the thing that they want to. It actually makes them better at communicating with their own designer... they can test their idea a lot earlier in the funnel."
+> "I think the hardest thing for PMs is often they can't manifest the thing that they want to. It actually makes them better at communicating with their own designer... they can test their idea a lot earlier in the funnel."
 > — [[The internal AI tool that's transforming how Stripe designs products - Owen Williams]]
 
 > "sometimes AI is a little bit like junk food. It's super tasty, you crave it, you think about it. It's really easy to get going. And then afterwards, you're looking at the packaging and you're a bit regretful and what you've created is a bit hollow."
@@ -127,7 +127,7 @@
 > "When people realize that what's being put in front of them is inauthentic and it's just created by AI, they disengage. Research says this very very clearly."
 > — [[Loredana Crisan - Figma's big bets for the future of AI design]]
 
-> "memes and humor is like how you show you're human in a world full of slop... the personal connections and throwing weird events and hanging out IRL and buying your customers coffee like the old skills that like people have laughed at for years are more important than ever."
+> "memes and humor is how you show you're human in a world full of slop... the personal connections and throwing weird events and hanging out IRL and buying your customers coffee, the old skills that people have laughed at for years are more important than ever."
 > — [[How a non-technical founder built a $100K ARR meme company - Jason Levin (Memelord CEO)]]
 
 > "I think that the audience is the medium. I think that what we are trying to do is get people to react to something really viscerally that we love."
@@ -184,7 +184,7 @@
 > "We are all finding that building software isn't as hard as it used to be, but growing an audience is as hard as it always has been."
 > — [[Ron Goldin - Building your ideas as a design leader]]
 
-> "Everyone should take a hard look in the mirror and re-evaluate how they spend their time. There's a lot of interactions that you have or direction that you're giving or decisions that you're making and I think like many of these things to me fit below the agent line. I think the agent line keeps going up."
+> "Everyone should take a hard look in the mirror and re-evaluate how they spend their time. There's a lot of interactions that you have or direction that you're giving or decisions that you're making and I think many of these things to me fit below the agent line. I think the agent line keeps going up."
 > — [[Braintrust CEO - Evals are the new PRD for AI products]]
 
 > "People that get, dare I say, territorial or constrained by what they used to do or what other people used to do are going to struggle with relevance and playing nicely in the sandbox."
@@ -229,7 +229,7 @@
 > "We actually lower the bar in terms of like tenure or experience level. We actually optimize now for high curiosity, high agency, and high energy."
 > — [[How to turn your company into AI builders - John Kim (Sendbird, co-founder and CEO)]]
 
-> "the kind of people who embrace the adventure are those that sort of thrive in ambitious times like like we're in now."
+> "the kind of people who embrace the adventure are those that thrive in ambitious times like we're in now."
 > — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
 
 

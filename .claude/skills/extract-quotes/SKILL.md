@@ -51,16 +51,44 @@ re-surface a line that's already in the library.
 
 ### 3. Select candidates
 
-Pull the lines genuinely worth keeping. You are filtering hard, not transcribing —
-a good source might yield 5–12 candidates, not 40. Favor a quote when it is:
+Filter hard — this is the heart of the skill, and the bar is high. Most of a
+transcript is not quotable: a strong source often yields just **2–5** keepers, and
+some yield none. Over-extracting buries the good lines and makes review tedious, so
+when in doubt, leave it out.
 
-- **Insightful** — names something true that most people haven't articulated.
-- **Surprising** — cuts against the obvious take, or reframes a familiar idea.
+**What earns a quote a place.** The themes already in `Quotes.md` are your editorial
+compass — a candidate should feel like it could sit beside them. They orbit one
+sensibility: **product and design work, deep craft, care and polish, unlocking new
+creative capability, and how design skill is expanding and deepening in the AI era.**
+Favor a line when it is:
+
+- **Insightful** — names something true about craft, design, or the changing work
+  that most people haven't articulated.
+- **Surprising** — reframes a familiar idea, or cuts against the obvious take.
 - **Thought-provoking** — leaves the reader chewing on it; quotable on its own.
 
-Skip throat-clearing, generic advice ("collaboration is important"), context-bound
-remarks that don't stand alone, and anything that only makes sense with the
-surrounding paragraph. A quote should survive being read cold, out of context.
+The strongest candidates are usually one of: a sharp **reframe or metaphor** ("carving
+rather than constructing"); an observation about **the human edge** — taste, judgment,
+care, humor, the things that stay valuable; a read on **how the role and skills are
+shifting**; or a **transferable principle** that outlasts any tool ("define success,
+not the work").
+
+**What to skip — even when it's well said.** These can sound like insight but carry no
+transferable idea or age out fast, and they are consistently unwanted:
+
+- **Model and product reviews** — verdicts on a specific model's quality, speed, cost,
+  or token use ("this model isn't grounded", "GPT's slop"). This is the single biggest
+  source of noise; cut it aggressively.
+- **Tooling mechanics** — how a feature works under the hood (memory files, agent
+  loops, API surface). Useful to know, not a quote.
+- **Transient or dated takes** — true only for this release or this month.
+- **Hype and vague praise** — "it's magic", "so good", enthusiasm with no idea inside.
+
+Also skip throat-clearing, generic advice ("collaboration is important"), and anything
+that only makes sense with its surrounding paragraph. A quote should survive being read
+cold. Judge each line on its own merit regardless of who is speaking — host and guest
+get the same bar. Length is not a filter: keep a longer passage when the reasoning
+itself is the value, as long as it holds one complete, self-contained thought.
 
 Pull each candidate **verbatim**. Keep it self-contained: trim to the sentence(s)
 that carry the idea, but never alter the words inside. A candidate may use `...` to
