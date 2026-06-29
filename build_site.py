@@ -384,6 +384,163 @@ TEMPLATE = """<!doctype html>
   <main id="field">
 {body}
   </main>
+  <script>
+  (function () {{
+    var field = document.getElementById("field");
+    if (!field) return;
+    var cards = Array.prototype.slice.call(field.querySelectorAll(".quote"));
+    if (cards.length < 2) return;
+
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var GUTTER = 30, MARGIN = 48;
+
+    function mulberry32(a) {{
+      return function () {{
+        a |= 0; a = (a + 0x6d2b79f5) | 0;
+        var t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }};
+    }}
+    var seed = (Date.now() >>> 0) || 1;
+    var rnd = mulberry32(seed);
+
+    function widthSet() {{
+      var w = window.innerWidth;
+      if (w < 560) return [240, 280];
+      if (w < 900) return [260, 300, 340];
+      return [280, 320, 360, 400];
+    }}
+
+    var viewport = document.createElement("div");
+    viewport.id = "viewport";
+    var world = document.createElement("div");
+    world.id = "world";
+    viewport.appendChild(world);
+
+    var TILE_W = 0, TILE_H = 0;
+    var tx = 0, ty = 0, vx = 0, vy = 0;
+    var raf = 0;
+
+    function computeTile() {{
+      var widths = widthSet();
+      var colW = Math.max.apply(null, widths);
+      var colCount = Math.max(3, Math.min(6, Math.round(Math.sqrt(cards.length))));
+      var colX = [];
+      for (var i = 0; i < colCount; i++) colX.push(MARGIN + i * (colW + GUTTER));
+      TILE_W = MARGIN * 2 + colCount * colW + (colCount - 1) * GUTTER;
+
+      var colY = [];
+      for (var c = 0; c < colCount; c++) colY.push(MARGIN + rnd() * 24);
+
+      var placed = [];
+      var bottom = 0;
+      for (var k = 0; k < cards.length; k++) {{
+        var card = cards[k];
+        var cw = widths[Math.floor(rnd() * widths.length)];
+        card.style.width = cw + "px";
+        var h = card.offsetHeight;
+
+        var ci = 0;
+        for (var j = 1; j < colCount; j++) if (colY[j] < colY[ci]) ci = j;
+
+        var slack = colW - cw;
+        var x = colX[ci] + (slack > 0 ? rnd() * slack : 0);
+        var y = colY[ci];
+        placed.push({{ card: card, x: x, y: y, w: cw }});
+        var nextY = y + h + GUTTER + rnd() * 22;
+        colY[ci] = nextY;
+        if (y + h > bottom) bottom = y + h;
+      }}
+      TILE_H = bottom + MARGIN;
+      return placed;
+    }}
+
+    function build() {{
+      world.innerHTML = "";
+      var placed = computeTile();
+      for (var di = -1; di <= 1; di++) {{
+        for (var dj = -1; dj <= 1; dj++) {{
+          for (var k = 0; k < placed.length; k++) {{
+            var p = placed[k];
+            var clone = p.card.cloneNode(true);
+            clone.style.width = p.w + "px";
+            clone.style.left = (p.x + di * TILE_W) + "px";
+            clone.style.top = (p.y + dj * TILE_H) + "px";
+            world.appendChild(clone);
+          }}
+        }}
+      }}
+    }}
+
+    function wrap(v, m) {{ var w = v % m; if (w > 0) w -= m; return w; }}
+    function apply() {{
+      world.style.transform =
+        "translate(" + wrap(tx, TILE_W) + "px," + wrap(ty, TILE_H) + "px)";
+    }}
+
+    document.body.appendChild(viewport);
+    document.body.classList.add("canvas");
+    build();
+    tx = -rnd() * TILE_W;
+    ty = -rnd() * TILE_H;
+    apply();
+
+    var dragging = false, lastX = 0, lastY = 0, lastT = 0;
+    var startX = 0, startY = 0, moved = false;
+
+    viewport.addEventListener("pointerdown", function (e) {{
+      dragging = true; moved = false;
+      try {{ viewport.setPointerCapture(e.pointerId); }} catch (_) {{}}
+      startX = lastX = e.clientX; startY = lastY = e.clientY;
+      lastT = performance.now(); vx = vy = 0;
+      if (raf) cancelAnimationFrame(raf);
+      viewport.classList.add("grabbing");
+    }});
+
+    viewport.addEventListener("pointermove", function (e) {{
+      if (!dragging) return;
+      var dx = e.clientX - lastX, dy = e.clientY - lastY;
+      tx += dx; ty += dy;
+      var now = performance.now(), dt = now - lastT || 16;
+      vx = (dx / dt) * 16; vy = (dy / dt) * 16;
+      lastX = e.clientX; lastY = e.clientY; lastT = now;
+      if (Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) > 6) moved = true;
+      apply();
+    }});
+
+    function endDrag(e) {{
+      if (!dragging) return;
+      dragging = false;
+      viewport.classList.remove("grabbing");
+      try {{ viewport.releasePointerCapture(e.pointerId); }} catch (_) {{}}
+      if (!reduce) momentum();
+    }}
+    viewport.addEventListener("pointerup", endDrag);
+    viewport.addEventListener("pointercancel", endDrag);
+
+    function momentum() {{
+      if (Math.abs(vx) < 0.1 && Math.abs(vy) < 0.1) return;
+      tx += vx; ty += vy; vx *= 0.94; vy *= 0.94;
+      apply();
+      raf = requestAnimationFrame(momentum);
+    }}
+
+    viewport.addEventListener("click", function (e) {{
+      if (moved) {{ e.preventDefault(); e.stopPropagation(); }}
+    }}, true);
+
+    var rt = 0;
+    window.addEventListener("resize", function () {{
+      clearTimeout(rt);
+      rt = setTimeout(function () {{
+        rnd = mulberry32(seed);
+        build();
+        apply();
+      }}, 200);
+    }});
+  }})();
+  </script>
 </body>
 </html>
 """
