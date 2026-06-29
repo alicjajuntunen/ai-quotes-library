@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 """Build a static index.html from the curated Quotes.md file.
 
-Parses the Obsidian-style quote list, which is grouped by theme:
+Parses the Obsidian-style quote list:
 
-    ## Theme name
     > "a quote"
     > — [[Author - Title]]
 
     > "another quote"
     > — [[Author - Title]]
 
-and renders a single self-contained HTML page grouped by theme, with each
-quote attributed back to its source. Only Quotes.md is read; the raw
-transcripts under Sources/ are never published.
+and renders a single self-contained HTML page, each quote attributed back to
+its source. Any `## headings` in Quotes.md are just editorial section markers
+for the source file; the build flattens past them. Only Quotes.md is read; the
+raw transcripts under Sources/ are never published.
 """
 
 import html
 import json
 import re
-from itertools import chain, zip_longest
 from pathlib import Path
 
 QUOTES_FILE = Path("AI quotes library/Quotes.md")
@@ -31,29 +30,26 @@ OUTPUT_FILE = Path("dist/index.html")
 # its directory already exists, so a normal build is unaffected on other setups.
 PREVIEW_MIRROR = Path("/tmp/ai-quotes-preview/index.html")
 
-THEME_RE = re.compile(r"^##\s+(?!\[\[)(.+?)\s*$")
 BYLINE_RE = re.compile(r"^>\s*[—–-]?\s*\[\[(.+?)\]\]\s*$")
 QUOTE_RE = re.compile(r"^>\s?(.*)$")
 
 
 def parse(text):
-    """Return a list of {theme, quotes:[{text, raw, author, title}]} groups."""
-    themes = []
-    current = None
+    """Return a flat list of {text, raw, author, title} quotes.
+
+    Walks the file pairing each block of quote bodies with the `[[Author -
+    Title]]` byline that follows it. `## headings` and other non-blockquote
+    lines are ignored — they only organise the source file, not the page.
+    """
+    quotes = []
     pending = []  # quote bodies seen but not yet attributed to a source
     for line in text.splitlines():
-        theme = THEME_RE.match(line)
-        if theme:
-            pending = []
-            current = {"theme": theme.group(1).strip(), "quotes": []}
-            themes.append(current)
-            continue
         byline = BYLINE_RE.match(line)
-        if byline and current is not None and pending:
+        if byline and pending:
             raw = byline.group(1).strip()
             author, _, title = raw.partition(" - ")
             for body in pending:
-                current["quotes"].append(
+                quotes.append(
                     {
                         "text": body,
                         "raw": raw,
@@ -68,17 +64,7 @@ def parse(text):
             body = quote.group(1).strip()
             if body:
                 pending.append(body)
-    return [t for t in themes if t["quotes"]]
-
-
-def interleave(themes):
-    """Flatten themes into one [(quote, theme_name)] list, round-robin across
-    themes so same-theme quotes are spread out across the canvas rather than
-    clustered. Quotes.md is grouped by theme, so naive source order would put a
-    theme's quotes adjacent; taking one quote from each theme per round mixes them.
-    """
-    columns = [[(q, t["theme"]) for q in t["quotes"]] for t in themes]
-    return [item for item in chain.from_iterable(zip_longest(*columns)) if item is not None]
+    return quotes
 
 
 def load_sources():
@@ -147,17 +133,39 @@ def strip_quotes(text):
     return text
 
 
-def render_card(quote, theme, sources, source_meta):
-    """One self-contained quote card: theme chip + quote glyph + quote + byline.
+COPY_ICON = (
+    '<svg class="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<rect x="9" y="9" width="13" height="13" rx="2"/>'
+    '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+)
+DONE_ICON = (
+    '<svg class="i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+    'stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M20 6 9 17l-5-5"/></svg>'
+)
 
-    The theme is shown as a small chip (it is a label, not a control); themes do
-    not drive layout. data-theme is also set for SEO / future use.
-    """
+
+def copy_text(quote, source_meta):
+    """The self-contained line placed on the clipboard: quote + attribution."""
+    meta = source_meta.get(quote["raw"], {})
+    author = meta.get("author") or quote["author"]
+    title = quote["title"]
+    line = "“" + strip_quotes(quote["text"]) + "”"
+    attribution = ", ".join(p for p in (author, title) if p)
+    if attribution:
+        line += " — " + attribution
+    return line
+
+
+def render_card(quote, sources, source_meta):
+    """One self-contained quote card: quote glyph + copy button + quote + byline."""
     return (
-        f'      <figure class="quote" data-theme="{html.escape(theme, quote=True)}">\n'
+        f'      <figure class="quote" data-copy="{html.escape(copy_text(quote, source_meta), quote=True)}">\n'
         f'        <div class="card-top">\n'
         f'          <span class="qmark" aria-hidden="true">&ldquo;</span>\n'
-        f'          <span class="chip">{html.escape(theme)}</span>\n'
+        f'          <button class="copy-btn" type="button" aria-label="Copy quote" title="Copy quote">'
+        f"{COPY_ICON}{DONE_ICON}</button>\n"
         f"        </div>\n"
         f'        <blockquote>{html.escape(strip_quotes(quote["text"]))}</blockquote>\n'
         f"        {render_byline(quote, sources, source_meta)}\n"
@@ -188,16 +196,9 @@ def render_byline(quote, sources, source_meta):
     return f'<figcaption class="source">{inner}</figcaption>'
 
 
-def render(themes, sources, source_meta):
-    pool = interleave(themes)
-    cards = "\n".join(
-        render_card(quote, theme, sources, source_meta) for quote, theme in pool
-    )
-    return TEMPLATE.format(
-        body=cards,
-        total=len(pool),
-        themes=len(themes),
-    )
+def render(quotes, sources, source_meta):
+    cards = "\n".join(render_card(quote, sources, source_meta) for quote in quotes)
+    return TEMPLATE.format(body=cards)
 
 
 TEMPLATE = """<!doctype html>
@@ -218,7 +219,6 @@ TEMPLATE = """<!doctype html>
     --faint: #c6c5c1;
     --rule: #e3e2de;
     --card: #fcfcfb;
-    --chip-text: #565550;
     --serif-display: "Literata", Georgia, "Times New Roman", serif;
     --serif-text: "Literata", Georgia, "Iowan Old Style", serif;
     --sans: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -271,21 +271,69 @@ TEMPLATE = """<!doctype html>
     line-height: 0.8;
     color: var(--ink);
   }}
-  .chip {{
-    flex: 0 1 auto;
-    max-width: 60%;
-    margin-top: 0.5rem;
-    padding: 4px 10px;
+  .copy-btn {{
+    flex: 0 0 auto;
+    margin-top: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
     border: 1px solid var(--rule);
-    border-radius: 999px;
+    border-radius: 8px;
     background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.18s ease, background 0.18s ease,
+      border-color 0.18s ease;
+  }}
+  .copy-btn:hover {{
+    color: var(--ink);
+    background: var(--card);
+    border-color: var(--muted);
+  }}
+  .copy-btn:focus-visible {{
+    outline: none;
+    border-color: var(--ink);
+  }}
+  .copy-btn svg {{ width: 15px; height: 15px; display: block; }}
+  .copy-btn .i-done {{ display: none; color: var(--ink); }}
+  .copy-btn.copied {{ color: var(--ink); border-color: var(--muted); }}
+  .copy-btn.copied .i-copy {{ display: none; }}
+  .copy-btn.copied .i-done {{ display: block; }}
+
+  /* Copy-confirmation toast, centered at the bottom of the viewport. */
+  #toast {{
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 50;
+    transform: translate(-50%, 12px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--bg);
     font-family: var(--sans);
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    line-height: 1.3;
-    color: var(--chip-text);
-    text-align: right;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    box-shadow: 0 14px 34px -16px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+  }}
+  #toast.show {{
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }}
+  #toast svg {{ width: 15px; height: 15px; display: block; }}
+  @media (prefers-reduced-motion: reduce) {{
+    #toast {{ transition: opacity 0.22s ease, visibility 0.22s; transform: translate(-50%, 0); }}
   }}
   blockquote {{
     margin: 0;
@@ -375,7 +423,6 @@ TEMPLATE = """<!doctype html>
       --faint: #46453f;
       --rule: #2a2a27;
       --card: #1b1b19;
-      --chip-text: #a7a59f;
     }}
   }}
 </style>
@@ -384,8 +431,54 @@ TEMPLATE = """<!doctype html>
   <main id="field">
 {body}
   </main>
+  <div id="toast" role="status" aria-live="polite">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+    <span>Quote copied</span>
+  </div>
   <script>
   (function () {{
+    // Copy-to-clipboard, wired at document level via delegation so it covers
+    // both the static fallback cards and the cloned cards on the canvas.
+    function writeClipboard(text) {{
+      if (navigator.clipboard && navigator.clipboard.writeText) {{
+        return navigator.clipboard.writeText(text).catch(legacyCopy.bind(null, text));
+      }}
+      legacyCopy(text);
+    }}
+    function legacyCopy(text) {{
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {{ document.execCommand("copy"); }} catch (_) {{}}
+      document.body.removeChild(ta);
+    }}
+    var toast = document.getElementById("toast");
+    var toastTimer = 0;
+    function showToast() {{
+      if (!toast) return;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {{ toast.classList.remove("show"); }}, 1800);
+    }}
+    document.addEventListener("click", function (e) {{
+      var btn = e.target.closest && e.target.closest(".copy-btn");
+      if (!btn) return;
+      var fig = btn.closest(".quote");
+      var text = fig && fig.getAttribute("data-copy");
+      if (!text) return;
+      writeClipboard(text);
+      showToast();
+      btn.classList.add("copied");
+      btn.setAttribute("aria-label", "Copied");
+      setTimeout(function () {{
+        btn.classList.remove("copied");
+        btn.setAttribute("aria-label", "Copy quote");
+      }}, 1300);
+    }});
+
     var field = document.getElementById("field");
     if (!field) return;
     var cards = Array.prototype.slice.call(field.querySelectorAll(".quote"));
@@ -405,11 +498,11 @@ TEMPLATE = """<!doctype html>
     var seed = (Date.now() >>> 0) || 1;
     var rnd = mulberry32(seed);
 
-    function widthSet() {{
+    function cardWidth() {{
       var w = window.innerWidth;
-      if (w < 560) return [240, 280];
-      if (w < 900) return [260, 300, 340];
-      return [280, 320, 360, 400];
+      if (w < 560) return 280;
+      if (w < 900) return 320;
+      return 340;
     }}
 
     var viewport = document.createElement("div");
@@ -418,78 +511,89 @@ TEMPLATE = """<!doctype html>
     world.id = "world";
     viewport.appendChild(world);
 
-    var TILE_W = 0, TILE_H = 0;
+    var TILE_W = 0;
     var tx = 0, ty = 0, vx = 0, vy = 0;
     var raf = 0;
+    var columns = [];  // per column: {{ hk, els: [container elements] }}
 
-    function computeTile() {{
-      var widths = widthSet();
-      var colW = Math.max.apply(null, widths);
-      var colCount = Math.max(3, Math.min(6, Math.round(Math.sqrt(cards.length))));
-      var colX = [];
-      for (var i = 0; i < colCount; i++) colX.push(MARGIN + i * (colW + GUTTER));
-      TILE_W = MARGIN * 2 + colCount * colW + (colCount - 1) * GUTTER;
-
-      var colY = [];
-      for (var c = 0; c < colCount; c++) colY.push(MARGIN + rnd() * 24);
-
-      var placed = [];
-      var bottom = 0;
-      for (var k = 0; k < cards.length; k++) {{
-        var card = cards[k];
-        var cw = widths[Math.floor(rnd() * widths.length)];
-        card.style.width = cw + "px";
-        var h = card.offsetHeight;
-
-        var ci = 0;
-        for (var j = 1; j < colCount; j++) if (colY[j] < colY[ci]) ci = j;
-
-        var slack = colW - cw;
-        var x = colX[ci] + (slack > 0 ? rnd() * slack : 0);
-        var y = colY[ci];
-        placed.push({{ card: card, x: x, y: y, w: cw }});
-        var nextY = y + h + GUTTER + rnd() * 22;
-        colY[ci] = nextY;
-        if (y + h > bottom) bottom = y + h;
-      }}
-      TILE_H = bottom + MARGIN;
-      return placed;
-    }}
-
-    function build() {{
+    // Lay cards into independent columns. Each column tiles vertically by its own
+    // height (with a trailing gutter), and the columns tile horizontally by TILE_W,
+    // so every gap — interior and across the wrap seam — is exactly GUTTER.
+    function layout() {{
       world.innerHTML = "";
-      var placed = computeTile();
-      for (var di = -1; di <= 1; di++) {{
-        for (var dj = -1; dj <= 1; dj++) {{
-          for (var k = 0; k < placed.length; k++) {{
-            var p = placed[k];
-            var clone = p.card.cloneNode(true);
-            clone.style.width = p.w + "px";
-            clone.style.left = (p.x + di * TILE_W) + "px";
-            clone.style.top = (p.y + dj * TILE_H) + "px";
-            world.appendChild(clone);
+      columns = [];
+      var colW = cardWidth();
+      var colCount = Math.max(3, Math.min(6, Math.round(Math.sqrt(cards.length))));
+      TILE_W = colCount * (colW + GUTTER);
+
+      // Shortest-column masonry: collect each column's cards and its total height.
+      var colCards = [], colH = [];
+      for (var i = 0; i < colCount; i++) {{ colCards.push([]); colH.push(0); }}
+      for (var k = 0; k < cards.length; k++) {{
+        cards[k].style.width = colW + "px";
+        var h = cards[k].offsetHeight;
+        var ci = 0;
+        for (var j = 1; j < colCount; j++) if (colH[j] < colH[ci]) ci = j;
+        colCards[ci].push({{ card: cards[k], y: colH[ci] }});
+        colH[ci] += h + GUTTER;  // trailing gutter => vertical seam gap == GUTTER
+      }}
+
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var DI = Math.ceil(vw / TILE_W);  // horizontal copies to cover the viewport
+      for (var ci2 = 0; ci2 < colCount; ci2++) {{
+        var hk = colH[ci2] || (vh + GUTTER);
+        var K = Math.max(1, Math.ceil(vh / hk));  // vertical copies per column
+        var els = [];
+        for (var di = 0; di <= DI; di++) {{
+          var col = document.createElement("div");
+          col.className = "col";
+          col.style.position = "absolute";
+          col.style.top = "0";
+          col.style.left = (di * TILE_W + ci2 * (colW + GUTTER)) + "px";
+          col.style.width = colW + "px";
+          col.style.willChange = "transform";
+          for (var c = 0; c <= K; c++) {{
+            for (var m = 0; m < colCards[ci2].length; m++) {{
+              var item = colCards[ci2][m];
+              var clone = item.card.cloneNode(true);
+              clone.style.width = colW + "px";
+              clone.style.left = "0";
+              clone.style.top = (c * hk + item.y) + "px";
+              col.appendChild(clone);
+            }}
           }}
+          world.appendChild(col);
+          els.push(col);
         }}
+        columns.push({{ hk: hk, els: els }});
       }}
     }}
 
     function wrap(v, m) {{ var w = v % m; if (w > 0) w -= m; return w; }}
     function apply() {{
-      world.style.transform =
-        "translate(" + wrap(tx, TILE_W) + "px," + wrap(ty, TILE_H) + "px)";
+      world.style.transform = "translateX(" + wrap(tx, TILE_W) + "px)";
+      for (var i = 0; i < columns.length; i++) {{
+        var wy = wrap(ty, columns[i].hk);
+        var els = columns[i].els;
+        for (var e = 0; e < els.length; e++) {{
+          els[e].style.transform = "translateY(" + wy + "px)";
+        }}
+      }}
     }}
 
     document.body.appendChild(viewport);
     document.body.classList.add("canvas");
-    build();
+    layout();
     tx = -rnd() * TILE_W;
-    ty = -rnd() * TILE_H;
+    ty = -rnd() * (columns.length ? columns[0].hk : 600);
     apply();
 
     var dragging = false, lastX = 0, lastY = 0, lastT = 0;
     var startX = 0, startY = 0, moved = false;
 
     viewport.addEventListener("pointerdown", function (e) {{
+      // Let the copy button receive a clean click instead of starting a drag.
+      if (e.target.closest && e.target.closest(".copy-btn")) return;
       dragging = true; moved = false;
       try {{ viewport.setPointerCapture(e.pointerId); }} catch (_) {{}}
       startX = lastX = e.clientX; startY = lastY = e.clientY;
@@ -535,7 +639,7 @@ TEMPLATE = """<!doctype html>
       clearTimeout(rt);
       rt = setTimeout(function () {{
         rnd = mulberry32(seed);
-        build();
+        layout();
         apply();
       }}, 200);
     }});
@@ -548,16 +652,15 @@ TEMPLATE = """<!doctype html>
 
 def main():
     text = QUOTES_FILE.read_text(encoding="utf-8")
-    themes = parse(text)
+    quotes = parse(text)
     sources = load_sources()
     source_meta = load_source_meta()
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    page = render(themes, sources, source_meta)
+    page = render(quotes, sources, source_meta)
     OUTPUT_FILE.write_text(page, encoding="utf-8")
     if PREVIEW_MIRROR.parent.is_dir():
         PREVIEW_MIRROR.write_text(page, encoding="utf-8")
-    total = sum(len(t["quotes"]) for t in themes)
-    print(f"Wrote {OUTPUT_FILE}: {total} quotes across {len(themes)} themes")
+    print(f"Wrote {OUTPUT_FILE}: {len(quotes)} quotes")
 
 
 if __name__ == "__main__":
