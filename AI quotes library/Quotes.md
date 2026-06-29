@@ -1,7 +1,7 @@
 
 ## Taste is the human edge
 
-> "Taste is a shorthand for 'this person has it and they miraculously somehow were born with it.' It's very very much not true... taste equals care. All of that stuff is care. It's taking the time to anticipate, to simulate, to consider how other people might feel, to put yourself in other people's shoes. And yes, like we say it's taste at the end, but it's just hard work."
+> "Taste is a shorthand for 'this person has it and they miraculously somehow were born with it.' It's very very much not true... taste equals care. All of that stuff is care. It's taking the time to anticipate, to simulate, to consider how other people might feel, to put yourself in other people's shoes. And yes, we say it's taste at the end, but it's just hard work."
 > — [[Loredana Crisan - Figma's big bets for the future of AI design]]
 
 > "There is no shortcut to having taste or developing a high-craft, high-velocity practice. With AI, we have shortcuts to creating a lot of things, but at the end of the day it comes back to discovering and learning the language of visual design."
@@ -25,8 +25,14 @@
 > "humor is the last frontier that no AI can really touch and humor comes from weird places in your mind of some weird mix of trauma pattern matching and absurdism"
 > — [[How a non-technical founder built a $100K ARR meme company - Jason Levin (Memelord CEO)]]
 
-> "It gets to 80%. But like that taste, that craft is like that's why designers will always exist in my opinion. Like they know how to elevate the experience... it's not going to be perfect. And like we are here to steer them."
+> "It gets to 80%. But that taste, that craft, that's why designers will always exist in my opinion. They know how to elevate the experience... it's not going to be perfect. And we are here to steer them."
 > — [[The internal AI tool that's transforming how Stripe designs products - Owen Williams]]
+
+> "we'll be swimming in some slop for a while, but that's okay because the great work will always rise above it."
+> — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
+
+> "When we surrender our consideration, we get polish on the surface, but something far less meaningful under the hood."
+> — [[Figma - Figma deep dive - Agentic workflows and the MCP]]
 
 
 ## The last mile is ours
@@ -46,16 +52,22 @@
 > "Product building and code writing now looks like carving rather than constructing. So it's very fast to create something that has too many features and too many buttons and too much code and you need to spend a lot of time removing stuff."
 > — [[Braintrust CEO - Evals are the new PRD for AI products]]
 
+> "resist the tools. Don't listen to the tools when they tell you that, you know, what you've created first time is good enough, and push for that extra 5% because that's the thing that actually makes your ideas stand above everyone else's."
+> — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
+
+> "AI is really great at building stuff that looks polished but it's full of holes and that kind of feedback is so important to get early on."
+> — [[Figma - Designing in code]]
+
 
 ## Direct it, don't expect it to design
 
-> "It's like the most patient collaborator that you could ever have that builds at such hyper speeds that humans could never build at. And you just have to know how to direct it."
+> "It's the most patient collaborator that you could ever have that builds at such hyper speeds that humans could never build at. And you just have to know how to direct it."
 > — [[Brett Williams - How a Visual Designer Became a Builder]]
 
 > "I don't think that AI is good at design, but it's good at taking direction. You can be good at directing AI, but you may be going down a bad road that isn't very tasteful."
 > — [[Brett Williams - How a Visual Designer Became a Builder]]
 
-> "AI gives me a level of precision that I've never had in my career and yet we always are quick to say like well AI slaps... I'm making micro decisions that I didn't have a grid for a year ago."
+> "AI gives me a level of precision that I've never had in my career and yet we always are quick to say, well, AI slaps... I'm making micro decisions that I didn't have a grid for a year ago."
 > — [[Tommy Geoco - The state of the design industry right now]]
 
 > "The AI becomes a little bit more of a collaborator rather than just a generator of outputs."
@@ -63,6 +75,9 @@
 
 > "You shouldn't be defining the work, you should be defining what success looks like."
 > — [[I let Codex run for 6 hours. Here's what happened]]
+
+> "The solutions we vibe code look polished and convincing, but they may not always match our initial intent."
+> — [[Figma - Designing in code]]
 
 
 ## When everyone can build, judgment wins
@@ -91,6 +106,18 @@
 > "I think the hardest thing for PMs is often they can't like manifest the thing that they want to. It actually makes them better at communicating with their own designer... they can test their idea a lot earlier in the funnel."
 > — [[The internal AI tool that's transforming how Stripe designs products - Owen Williams]]
 
+> "sometimes AI is a little bit like junk food. It's super tasty, you crave it, you think about it. It's really easy to get going. And then afterwards, you're looking at the packaging and you're a bit regretful and what you've created is a bit hollow."
+> — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
+
+> "You've got to be great at evaluating other people's work and you've got to be really good at evaluating the AI's work now as well. So, this skill of evaluation and judgement is something that I think is really good to cultivate in your teams."
+> — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
+
+> "whenever you have an abundance of choice, this is where design is at its most needed"
+> — [[Grant Sanderson - Designing Math]]
+
+> "So, I think that it's more exciting because we can try more things. We can experiment with more things. But we also have to be more discerning about what we experiment with and what types of ideas that we have."
+> — [[Sheta Chatterjee - The UX of Gemini Enterprise]]
+
 
 ## Make people feel something
 
@@ -103,6 +130,9 @@
 > "memes and humor is like how you show you're human in a world full of slop... the personal connections and throwing weird events and hanging out IRL and buying your customers coffee like the old skills that like people have laughed at for years are more important than ever."
 > — [[How a non-technical founder built a $100K ARR meme company - Jason Levin (Memelord CEO)]]
 
+> "I think that the audience is the medium. I think that what we are trying to do is get people to react to something really viscerally that we love."
+> — [[Brent David Freaney - Death of the finished state]]
+
 
 ## Don't skip the thinking
 
@@ -114,6 +144,24 @@
 
 > "It's better to go slow in the right direction."
 > — [[Addy Osmani - The AI-Assisted Developer Workflow (JSNation US 2024)]]
+
+> "in this time with AI, it's very easy to find yourself skipping that step and rushing towards just the making. And actually the best ideas, the best work comes from having that really strong connection with the people that you're making for."
+> — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
+
+> "Really, the substance behind any explanation is understanding not just what's true, but why it's true."
+> — [[Grant Sanderson - Designing Math]]
+
+> "We get unprecedented speed with our new AI workflows. We can spin up prototypes quicker than ever. But speed itself isn't a solution."
+> — [[Figma - Designing in code]]
+
+> "And you only understand how good one idea is by seeing many of them."
+> — [[Figma - Designing in code]]
+
+> "Cognitive surrender is when we adopt an LLM's judgment as our own. This relieves ourselves of the burden of validation, and often the work required for a distinct point of view."
+> — [[Figma - Figma deep dive - Agentic workflows and the MCP]]
+
+> "AI accelerates execution, not clarity. If anything, AI can get in the way of clarity."
+> — [[Figma - Figma deep dive - Agentic workflows and the MCP]]
 
 
 ## The job is being remade
@@ -181,6 +229,9 @@
 > "We actually lower the bar in terms of like tenure or experience level. We actually optimize now for high curiosity, high agency, and high energy."
 > — [[How to turn your company into AI builders - John Kim (Sendbird, co-founder and CEO)]]
 
+> "the kind of people who embrace the adventure are those that sort of thrive in ambitious times like like we're in now."
+> — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
+
 
 ## Powerful tools, unreliable hands
 
@@ -205,6 +256,9 @@
 > "What I really appreciate about these new generative AI models, in particular these multimodal ones, image and video, is it unlocks for me an ability to create something that I would have never been able to do before. So I would have never been able to solo produce a hype video for my podcast. I would have a hard time brainstorming it, I wouldn't know how to frame it, I wouldn't know how to block it. But now I have this AI producer here that can help me with this effort."
 > — [[I cloned myself with Gemini Omni in 15 minutes (and it's terrifyingly good)]]
 
+> "the most helpful and supportive of AI collaborator is one that can actually do the stuff that maybe you don't like, and so you can focus on things you care about the most. And that's a different thing for basically everybody, and we all have a unique relationship with that work."
+> — [[Figma - Figma deep dive - Agents]]
+
 
 ## Shifting, not collapsing
 
@@ -213,6 +267,9 @@
 
 > "Turns out, the sky isn't falling – it's shifting."
 > — [[Siege Media - SEO Impact of AI Overviews]]
+
+> "a lot of things have changed, but the fundamentals haven't changed. Because we're still making sure that we are serving our users, that we understand their workflows... We still care about craft."
+> — [[Sheta Chatterjee - The UX of Gemini Enterprise]]
 
 
 ## Quiet AI beats the magic text box
@@ -225,6 +282,9 @@
 
 > "Probably one of the most underrated yet impactful design patterns for AI interfaces is the ability to tune AI experience. This could show itself as a style lenses or temperature knobs — little tools to help users request a personalized output easier."
 > — [[AI Interaction Design Patterns (Notion)]]
+
+> "Some of our favorite tools are the ones where the interface can kind of just melt away and you can focus on doing the actual work."
+> — [[Figma - Figma deep dive - Agents]]
 
 
 ## Once it works, it's just software

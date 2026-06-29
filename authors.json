@@ -56,6 +56,10 @@
     "author": "Ankur Goyal",
     "role": "Co-founder & CEO, Braintrust"
   },
+  "Brent David Freaney - Death of the finished state": {
+    "author": "Brent David Freaney",
+    "role": "Art Director, Special Offer"
+  },
   "Brett Williams - How a Visual Designer Became a Builder": {
     "author": "Brett Williams",
     "role": "Founder, Designjoy"
@@ -98,6 +102,36 @@
     "author": "Evan Spiegel",
     "role": "Co-founder & CEO, Snap"
   },
+  "Figma - Designing in code": {
+    "author": "Figma"
+  },
+  "Figma - Figma deep dive - Agent-built plugins": {
+    "author": "Figma"
+  },
+  "Figma - Figma deep dive - Agentic workflows and the MCP": {
+    "author": "Figma"
+  },
+  "Figma - Figma deep dive - Agents": {
+    "author": "Figma"
+  },
+  "Figma - Figma deep dive - Generative shader effects": {
+    "author": "Figma"
+  },
+  "Figma - Figma deep dive - Make": {
+    "author": "Figma"
+  },
+  "Figma - Figma deep dive - Motion": {
+    "author": "Figma"
+  },
+  "Figma - How to use Motion, Weave tools, and shaders with Figma AI": {
+    "author": "Figma"
+  },
+  "Figma - Learn Figma Motion in 8 minutes": {
+    "author": "Figma"
+  },
+  "Figma - My code to canvas roundtrip with the Figma MCP server": {
+    "author": "Figma"
+  },
   "Fiona Fung - What happens after coding is solved": {
     "author": "Fiona Fung",
     "role": "Head of Engineering, Claude Code & Cowork (Anthropic)"
@@ -112,6 +146,10 @@
   },
   "GoPenAI - How Agentic RAG Works": {
     "author": "Kadam Sayali"
+  },
+  "Grant Sanderson - Designing Math": {
+    "author": "Grant Sanderson",
+    "role": "Creator, 3Blue1Brown"
   },
   "Groktop - Duolingo's AI-First Disaster": {
     "author": "Magnus Hedemark"
@@ -320,6 +358,10 @@
   "She built a Claude shopping assistant to stop buying cheap junk": {
     "author": "Nicole Ruiz"
   },
+  "Sheta Chatterjee - The UX of Gemini Enterprise": {
+    "author": "Sheta Chatterjee",
+    "role": "Senior Director, Head of UX & Design, Google Cloud AI"
+  },
   "Siege Media - SEO Impact of AI Overviews": {
     "author": "Ross Hudgens"
   },
@@ -333,6 +375,10 @@
   "Spec-driven development - the AI engineering workflow at Notion - Ryan Nystrom": {
     "author": "Ryan Nystrom",
     "role": "Engineering Manager, Notion"
+  },
+  "Teo Connor - Scaling taste, craft, and quality in the AI era": {
+    "author": "Teo Connor",
+    "role": "VP of Design, Airbnb"
   },
   "The internal AI tool that's transforming how Stripe designs products - Owen Williams": {
     "author": "Owen Williams",
