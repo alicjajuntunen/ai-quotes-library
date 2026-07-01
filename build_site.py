@@ -661,31 +661,51 @@ TEMPLATE = """<!doctype html>
     var columns = [];  // per column: {{ hk, els: [container elements] }}
     var centers = [];  // per card: {{ cx, cy, hk }} — its centre in world coords
 
+    // Filter state. When both are empty the field is the infinite default;
+    // any active filter switches layout() into finite (bounded) mode.
+    var filter = {{ query: "", theme: null }};
+    function filtered() {{ return !!(filter.query || filter.theme); }}
+    function matches(card) {{
+      if (filter.theme && card.getAttribute("data-theme") !== filter.theme) return false;
+      if (filter.query) {{
+        var hay = card.getAttribute("data-search") || "";
+        if (hay.indexOf(filter.query) === -1) return false;
+      }}
+      return true;
+    }}
+    function visibleCards() {{
+      return filtered() ? cards.filter(matches) : cards;
+    }}
+
     // Lay cards into independent columns. Each column tiles vertically by its own
     // height (with a trailing gutter), and the columns tile horizontally by TILE_W,
     // so every gap — interior and across the wrap seam — is exactly GUTTER.
+    var finite = false;      // true while a filter is active
+    var boundW = 0, boundH = 0;  // finite-mode content extents (world coords)
     function layout() {{
       world.innerHTML = "";
       columns = [];
       centers = [];
+      var active = visibleCards();
+      finite = filtered();
       var colW = cardWidth();
-      var colCount = Math.max(3, Math.min(6, Math.round(Math.sqrt(cards.length))));
+      var colCount = Math.max(3, Math.min(6, Math.round(Math.sqrt(Math.max(1, active.length)))));
       TILE_W = colCount * (colW + GUTTER);
 
       // Shortest-column masonry: collect each column's cards and its total height.
       var colCards = [], colH = [];
       for (var i = 0; i < colCount; i++) {{ colCards.push([]); colH.push(0); }}
-      for (var k = 0; k < cards.length; k++) {{
-        cards[k].style.width = colW + "px";
-        var h = cards[k].offsetHeight;
+      for (var k = 0; k < active.length; k++) {{
+        active[k].style.width = colW + "px";
+        var h = active[k].offsetHeight;
         var ci = 0;
         for (var j = 1; j < colCount; j++) if (colH[j] < colH[ci]) ci = j;
-        colCards[ci].push({{ card: cards[k], y: colH[ci] }});
+        colCards[ci].push({{ card: active[k], y: colH[ci] }});
         colH[ci] += h + GUTTER;  // trailing gutter => vertical seam gap == GUTTER
       }}
 
       var vw = window.innerWidth, vh = window.innerHeight;
-      var DI = Math.ceil(vw / TILE_W);  // horizontal copies to cover the viewport
+      var DI = finite ? 0 : Math.ceil(vw / TILE_W);  // horizontal copies to cover the viewport
       for (var ci2 = 0; ci2 < colCount; ci2++) {{
         var hk = colH[ci2] || (vh + GUTTER);
         var colCx = ci2 * (colW + GUTTER) + colW / 2;
@@ -693,7 +713,7 @@ TEMPLATE = """<!doctype html>
           var ic = colCards[ci2][mc];
           centers.push({{ cx: colCx, cy: ic.y + ic.card.offsetHeight / 2, hk: hk }});
         }}
-        var K = Math.max(1, Math.ceil(vh / hk));  // vertical copies per column
+        var K = finite ? 0 : Math.max(1, Math.ceil(vh / hk));  // vertical copies per column
         var els = [];
         for (var di = 0; di <= DI; di++) {{
           var col = document.createElement("div");
@@ -718,13 +738,19 @@ TEMPLATE = """<!doctype html>
         }}
         columns.push({{ hk: hk, els: els }});
       }}
+      if (finite) {{
+        boundW = colCount * (colW + GUTTER) - GUTTER;
+        boundH = 0;
+        for (var bi = 0; bi < colH.length; bi++) boundH = Math.max(boundH, colH[bi] - GUTTER);
+      }}
     }}
 
     function wrap(v, m) {{ var w = v % m; if (w > 0) w -= m; return w; }}
     function apply() {{
-      world.style.transform = "translateX(" + wrap(tx, TILE_W) + "px)";
+      var wx = finite ? tx : wrap(tx, TILE_W);
+      world.style.transform = "translateX(" + wx + "px)";
       for (var i = 0; i < columns.length; i++) {{
-        var wy = wrap(ty, columns[i].hk);
+        var wy = finite ? ty : wrap(ty, columns[i].hk);
         var els = columns[i].els;
         for (var e = 0; e < els.length; e++) {{
           els[e].style.transform = "translateY(" + wy + "px)";
@@ -751,6 +777,34 @@ TEMPLATE = """<!doctype html>
       return {{ dx: bdx, dy: bdy }};
     }}
     function centerNow() {{ var n = nearest(); tx += n.dx; ty += n.dy; }}
+
+    // Finite mode: allowed pan range so the block stays reachable but bounded.
+    function panRange() {{
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var minX = Math.min(0, vw - boundW - MARGIN * 2);
+      var minY = Math.min(0, vh - boundH - MARGIN * 2);
+      return {{ minX: minX, maxX: 0, minY: minY, maxY: 0 }};
+    }}
+    // Pull an out-of-range value back toward [lo, hi]; k controls softness.
+    function clampSoft(v, lo, hi, k) {{
+      if (v < lo) return lo + (v - lo) * k;
+      if (v > hi) return hi + (v - hi) * k;
+      return v;
+    }}
+
+    // Recompute the visible subset and relayout. Called by every dock control.
+    function applyFilter() {{
+      layout();
+      if (finite) {{
+        tx = MARGIN; ty = MARGIN;   // land at the block's top-left with breathing room
+        committed = false; vx = vy = 0;
+        apply();
+      }} else {{
+        rnd = mulberry32(seed);
+        centerNow();
+        apply();
+      }}
+    }}
 
     document.body.appendChild(viewport);
     document.body.classList.add("canvas");
@@ -880,7 +934,33 @@ TEMPLATE = """<!doctype html>
         var gate = Math.max(0, 1 - dspeed / DRAG_V);
         var kEff = (1 - Math.pow(1 - DRAG_PULL, frames)) * gate * gate;
         if (kEff > 0) {{ var nd = nearest(); tx += nd.dx * kEff; ty += nd.dy * kEff; }}
+        if (finite) {{
+          var r = panRange();
+          tx = clampSoft(tx, r.minX, r.maxX, 0.5);
+          ty = clampSoft(ty, r.minY, r.maxY, 0.5);
+        }}
         apply();
+        raf = requestAnimationFrame(tick);
+        return;
+      }}
+
+      if (finite) {{
+        // Free glide, then a spring that pulls any out-of-range axis back to bound.
+        tx += vx * dt; ty += vy * dt;
+        var md2 = Math.pow(MOM_DECAY, frames);
+        vx *= md2; vy *= md2;
+        var r2 = panRange();
+        var tgx = Math.min(r2.maxX, Math.max(r2.minX, tx));
+        var tgy = Math.min(r2.maxY, Math.max(r2.minY, ty));
+        var ox = tx - tgx, oy = ty - tgy;
+        if (ox || oy) {{
+          vx += (-OMEGA * OMEGA * ox - 2 * OMEGA * vx) * dt;
+          vy += (-OMEGA * OMEGA * oy - 2 * OMEGA * vy) * dt;
+        }}
+        tx += vx * dt; ty += vy * dt;
+        apply();
+        if (Math.abs(ox) < 0.3 && Math.abs(oy) < 0.3 &&
+            Math.sqrt(vx * vx + vy * vy) < 4) {{ raf = 0; prevFrame = 0; return; }}
         raf = requestAnimationFrame(tick);
         return;
       }}
