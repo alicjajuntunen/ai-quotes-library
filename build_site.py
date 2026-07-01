@@ -32,18 +32,25 @@ PREVIEW_MIRROR = Path("/tmp/ai-quotes-preview/index.html")
 
 BYLINE_RE = re.compile(r"^>\s*[—–-]?\s*\[\[(.+?)\]\]\s*$")
 QUOTE_RE = re.compile(r"^>\s?(.*)$")
+HEADING_RE = re.compile(r"^##\s+(.*)$")
 
 
 def parse(text):
-    """Return a flat list of {text, raw, author, title} quotes.
+    """Return a flat list of {text, raw, author, title, theme} quotes.
 
     Walks the file pairing each block of quote bodies with the `[[Author -
-    Title]]` byline that follows it. `## headings` and other non-blockquote
-    lines are ignored — they only organise the source file, not the page.
+    Title]]` byline that follows it, tagging each with the most recent `##`
+    heading (its editorial theme). Non-blockquote lines other than headings are
+    ignored — they only organise the source file, not the page.
     """
     quotes = []
     pending = []  # quote bodies seen but not yet attributed to a source
+    theme = ""    # most recent `## heading`, stamped onto each quote
     for line in text.splitlines():
+        heading = HEADING_RE.match(line)
+        if heading:
+            theme = heading.group(1).strip()
+            continue
         byline = BYLINE_RE.match(line)
         if byline and pending:
             raw = byline.group(1).strip()
@@ -55,6 +62,7 @@ def parse(text):
                         "raw": raw,
                         "author": author.strip() if title else "",
                         "title": title.strip() if title else raw,
+                        "theme": theme,
                     }
                 )
             pending = []
