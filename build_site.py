@@ -954,9 +954,9 @@ TEMPLATE = """<!doctype html>
       searchInput.focus();
     }}
     function closeSearch() {{
+      searchInput.value = "";                 // clear before hiding so a reopen shows no stale text
       dock.classList.remove("searching");
       if (filter.query) {{ filter.query = ""; applyFilter(); }}
-      searchInput.value = "";
     }}
     searchBtn.addEventListener("click", openSearch);
     searchInput.addEventListener("input", function () {{
