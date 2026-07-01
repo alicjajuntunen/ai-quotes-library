@@ -588,6 +588,32 @@ TEMPLATE = """<!doctype html>
     white-space: nowrap;
   }}
   .theme-pill.on {{ background: var(--bg); color: var(--ink); font-style: normal; font-weight: 500; }}
+  #dock.searching .dock-sep {{ opacity: 0.35; }}
+  #dock.searching #themes-btn,
+  #dock.searching #shuffle-btn {{
+    opacity: 0.5;
+    padding-left: 6px;
+    padding-right: 6px;
+  }}
+  #dock-search {{
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+  }}
+  #dock.searching #dock-search {{ display: inline-flex; }}
+  #dock.searching #search-btn {{ display: none; }}
+  #dock-search input {{
+    border: none;
+    background: transparent;
+    color: var(--bg);
+    font: inherit;
+    outline: none;
+    width: 170px;
+  }}
+  #dock-search input::placeholder {{ color: rgba(255, 255, 255, 0.5); }}
   /* Dark mode: charcoal dock on a near-black bg needs a hairline to separate. */
   @media (prefers-color-scheme: dark) {{
     #dock {{ border-color: var(--rule); }}
@@ -858,14 +884,17 @@ TEMPLATE = """<!doctype html>
     var searchBtn = document.createElement("button");
     searchBtn.type = "button";
     searchBtn.className = "dock-btn";
+    searchBtn.id = "search-btn";
     searchBtn.innerHTML = SEARCH_ICON + "<span>Search</span>";
     var themesBtn = document.createElement("button");
     themesBtn.type = "button";
     themesBtn.className = "dock-btn";
+    themesBtn.id = "themes-btn";
     themesBtn.innerHTML = THEMES_ICON + "<span>Themes</span>";
     var shuffleBtn = document.createElement("button");
     shuffleBtn.type = "button";
     shuffleBtn.className = "dock-btn";
+    shuffleBtn.id = "shuffle-btn";
     shuffleBtn.setAttribute("aria-label", "Shuffle");
     shuffleBtn.innerHTML = SHUFFLE_ICON;
     function sep() {{ var s = document.createElement("span"); s.className = "dock-sep"; return s; }}
@@ -906,6 +935,39 @@ TEMPLATE = """<!doctype html>
     function closeThemes() {{ pills.hidden = true; syncThemePills(); }}
     themesBtn.addEventListener("click", function () {{
       if (pills.hidden) openThemes(); else closeThemes();
+    }});
+
+    // Search morphs the button into an inline field (reusing the dock search glyph).
+    var searchWrap = document.createElement("span");
+    searchWrap.id = "dock-search";
+    searchWrap.innerHTML = SEARCH_ICON;
+    var searchInput = document.createElement("input");
+    searchInput.type = "text";
+    searchInput.placeholder = "Search quotes";
+    searchInput.setAttribute("aria-label", "Search quotes");
+    searchWrap.appendChild(searchInput);
+    dock.insertBefore(searchWrap, searchBtn);
+
+    function openSearch() {{
+      closeThemes();
+      dock.classList.add("searching");
+      searchInput.focus();
+    }}
+    function closeSearch() {{
+      dock.classList.remove("searching");
+      if (filter.query) {{ filter.query = ""; applyFilter(); }}
+      searchInput.value = "";
+    }}
+    searchBtn.addEventListener("click", openSearch);
+    searchInput.addEventListener("input", function () {{
+      filter.query = searchInput.value.trim().toLowerCase();
+      applyFilter();
+    }});
+    searchInput.addEventListener("keydown", function (e) {{
+      if (e.key === "Escape") {{ closeSearch(); searchInput.blur(); }}
+    }});
+    searchInput.addEventListener("blur", function () {{
+      if (!filter.query) closeSearch();  // empty field on blur restores resting pill
     }});
 
     layout();
