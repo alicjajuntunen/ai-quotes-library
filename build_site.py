@@ -559,6 +559,35 @@ TEMPLATE = """<!doctype html>
   .dock-btn.on {{ background: var(--bg); color: var(--ink); }}
   .dock-sep {{ width: 1px; height: 16px; background: rgba(255, 255, 255, 0.18); }}
   .dock-ic {{ width: 15px; height: 15px; display: block; flex: 0 0 auto; }}
+  #theme-pills {{
+    position: fixed;
+    left: 50%;
+    bottom: 74px;
+    transform: translateX(-50%);
+    z-index: 19;
+    width: min(560px, 92vw);
+    max-height: calc(3 * 40px);
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }}
+  #theme-pills[hidden] {{ display: none; }}
+  .theme-pill {{
+    padding: 7px 14px;
+    border: none;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--serif-text);
+    font-style: italic;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+  }}
+  .theme-pill.on {{ background: var(--bg); color: var(--ink); font-style: normal; font-weight: 500; }}
   /* Dark mode: charcoal dock on a near-black bg needs a hairline to separate. */
   @media (prefers-color-scheme: dark) {{
     #dock {{ border-color: var(--rule); }}
@@ -844,6 +873,39 @@ TEMPLATE = """<!doctype html>
     dock.appendChild(themesBtn); dock.appendChild(sep());
     dock.appendChild(shuffleBtn);
     document.body.appendChild(dock);
+
+    // Theme pills float above the dock; single-select.
+    var pills = document.createElement("div");
+    pills.id = "theme-pills";
+    pills.hidden = true;
+    themes.forEach(function (name) {{
+      var p = document.createElement("button");
+      p.type = "button";
+      p.className = "theme-pill";
+      p.textContent = name;
+      p.addEventListener("click", function () {{
+        if (filter.theme === name) {{ filter.theme = null; }}  // re-click clears
+        else {{ filter.theme = name; }}
+        syncThemePills();
+        applyFilter();
+      }});
+      pills.appendChild(p);
+    }});
+    document.body.appendChild(pills);
+
+    function syncThemePills() {{
+      var kids = pills.querySelectorAll(".theme-pill");
+      for (var i = 0; i < kids.length; i++) {{
+        kids[i].classList.toggle("on", kids[i].textContent === filter.theme);
+      }}
+      themesBtn.classList.toggle("on", !pills.hidden || !!filter.theme);
+    }}
+
+    function openThemes() {{ pills.hidden = false; syncThemePills(); }}
+    function closeThemes() {{ pills.hidden = true; syncThemePills(); }}
+    themesBtn.addEventListener("click", function () {{
+      if (pills.hidden) openThemes(); else closeThemes();
+    }});
 
     layout();
     tx = -rnd() * TILE_W;
