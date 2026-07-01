@@ -614,6 +614,19 @@ TEMPLATE = """<!doctype html>
     width: 170px;
   }}
   #dock-search input::placeholder {{ color: rgba(255, 255, 255, 0.5); }}
+  #empty-note {{
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 15;
+    font-family: var(--serif-text);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--muted);
+    pointer-events: none;
+  }}
+  #empty-note[hidden] {{ display: none; }}
   /* Dark mode: charcoal dock on a near-black bg needs a hairline to separate. */
   @media (prefers-color-scheme: dark) {{
     #dock {{ border-color: var(--rule); }}
@@ -856,6 +869,7 @@ TEMPLATE = """<!doctype html>
       if (raf) {{ cancelAnimationFrame(raf); raf = 0; }}
       prevFrame = 0;
       layout();
+      emptyNote.hidden = !(finite && visibleCards().length === 0);
       if (finite) {{
         tx = MARGIN; ty = MARGIN;   // land at the block's top-left with breathing room
         committed = false; vx = vy = 0;
@@ -923,6 +937,12 @@ TEMPLATE = """<!doctype html>
     }});
     document.body.appendChild(pills);
 
+    var emptyNote = document.createElement("div");
+    emptyNote.id = "empty-note";
+    emptyNote.hidden = true;
+    emptyNote.textContent = "No quotes match";
+    document.body.appendChild(emptyNote);
+
     function syncThemePills() {{
       var kids = pills.querySelectorAll(".theme-pill");
       for (var i = 0; i < kids.length; i++) {{
@@ -934,7 +954,12 @@ TEMPLATE = """<!doctype html>
     function openThemes() {{ pills.hidden = false; syncThemePills(); }}
     function closeThemes() {{ pills.hidden = true; syncThemePills(); }}
     themesBtn.addEventListener("click", function () {{
-      if (pills.hidden) openThemes(); else closeThemes();
+      if (pills.hidden) {{
+        if (dock.classList.contains("searching")) closeSearch();
+        openThemes();
+      }} else {{
+        closeThemes();
+      }}
     }});
 
     // Search morphs the button into an inline field (reusing the dock search glyph).
@@ -968,6 +993,23 @@ TEMPLATE = """<!doctype html>
     }});
     searchInput.addEventListener("blur", function () {{
       if (!filter.query) closeSearch();  // empty field on blur restores resting pill
+    }});
+
+    // Shuffle cancels any active filter, returns to the infinite field, and
+    // springs to a random quote.
+    shuffleBtn.addEventListener("click", function () {{
+      filter.query = ""; filter.theme = null;
+      searchInput.value = "";
+      dock.classList.remove("searching");
+      closeThemes();
+      if (raf) {{ cancelAnimationFrame(raf); raf = 0; }}
+      prevFrame = 0;
+      layout();
+      tx = -rnd() * TILE_W;
+      ty = -rnd() * (columns.length ? columns[0].hk : 600);
+      centerNow();
+      committed = false; vx = vy = 0;
+      if (!reduce) startLoop(); else apply();
     }});
 
     layout();
