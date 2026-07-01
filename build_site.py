@@ -558,6 +558,7 @@ TEMPLATE = """<!doctype html>
   .dock-btn:hover {{ background: rgba(255, 255, 255, 0.12); }}
   .dock-btn.on {{ background: var(--bg); color: var(--ink); }}
   .dock-sep {{ width: 1px; height: 16px; background: rgba(255, 255, 255, 0.18); }}
+  .dock-ic {{ width: 15px; height: 15px; display: block; flex: 0 0 auto; }}
   /* Dark mode: charcoal dock on a near-black bg needs a hairline to separate. */
   @media (prefers-color-scheme: dark) {{
     #dock {{ border-color: var(--rule); }}
@@ -817,21 +818,27 @@ TEMPLATE = """<!doctype html>
 
     // --- Dock: floating Search / Themes / Shuffle control ---------------------
     var themes = Array.isArray(window.__THEMES__) ? window.__THEMES__ : [];
+    // Inline SVG glyphs (Feather/Lucide style, matching COPY_ICON et al.) so the
+    // dock reads with the rest of the site rather than using emoji.
+    var IC = '<svg class="dock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+    var SEARCH_ICON = IC + '<circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>';
+    var THEMES_ICON = IC + '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>';
+    var SHUFFLE_ICON = IC + '<polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>';
     var dock = document.createElement("div");
     dock.id = "dock";
     var searchBtn = document.createElement("button");
     searchBtn.type = "button";
     searchBtn.className = "dock-btn";
-    searchBtn.innerHTML = "🔍 Search";
+    searchBtn.innerHTML = SEARCH_ICON + "<span>Search</span>";
     var themesBtn = document.createElement("button");
     themesBtn.type = "button";
     themesBtn.className = "dock-btn";
-    themesBtn.innerHTML = "✦ Themes";
+    themesBtn.innerHTML = THEMES_ICON + "<span>Themes</span>";
     var shuffleBtn = document.createElement("button");
     shuffleBtn.type = "button";
     shuffleBtn.className = "dock-btn";
     shuffleBtn.setAttribute("aria-label", "Shuffle");
-    shuffleBtn.textContent = "🎲";
+    shuffleBtn.innerHTML = SHUFFLE_ICON;
     function sep() {{ var s = document.createElement("span"); s.className = "dock-sep"; return s; }}
     dock.appendChild(searchBtn); dock.appendChild(sep());
     dock.appendChild(themesBtn); dock.appendChild(sep());
