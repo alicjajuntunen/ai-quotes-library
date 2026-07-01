@@ -883,6 +883,7 @@ TEMPLATE = """<!doctype html>
       p.type = "button";
       p.className = "theme-pill";
       p.textContent = name;
+      p.dataset.name = name;  // compared in syncThemePills — independent of the label markup
       p.addEventListener("click", function () {{
         if (filter.theme === name) {{ filter.theme = null; }}  // re-click clears
         else {{ filter.theme = name; }}
@@ -896,7 +897,7 @@ TEMPLATE = """<!doctype html>
     function syncThemePills() {{
       var kids = pills.querySelectorAll(".theme-pill");
       for (var i = 0; i < kids.length; i++) {{
-        kids[i].classList.toggle("on", kids[i].textContent === filter.theme);
+        kids[i].classList.toggle("on", kids[i].dataset.name === filter.theme);
       }}
       themesBtn.classList.toggle("on", !pills.hidden || !!filter.theme);
     }}
