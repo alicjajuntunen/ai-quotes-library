@@ -21,6 +21,10 @@
     "author": "Simon Willison",
     "role": "Creator, Datasette; Co-creator, Django"
   },
+  "Andrew Ambrosino - OpenAI Codex lead on taste, curation, and building for AGI": {
+    "author": "Andrew Ambrosino",
+    "role": "Codex lead, OpenAI"
+  },
   "Andy Madrick - Why AI changed design handoff forever": {
     "author": "Andy Madrick",
     "role": "Product Designer, Notion"
@@ -84,15 +88,31 @@
     "author": "Claire Vo",
     "role": "Host, How I AI"
   },
+  "Dan Pupius - Your AI Strategy Is Making Bets. Do You Know Which Ones": {
+    "author": "Dan Pupius",
+    "role": "Chief Technology Officer, The General Partnership"
+  },
   "Dan Shipper - AI predictions - Job markets, Codex beats Claude, and the death of org charts": {
     "author": "Dan Shipper",
     "role": "Co-founder & CEO, Every"
+  },
+  "Dan Shipper - The Moral of Fable": {
+    "author": "Dan Shipper",
+    "role": "Cofounder and CEO, Every"
+  },
+  "Dan Shipper - Vibe Check - Fable 5 Is the Best Coding Model in the World": {
+    "author": "Dan Shipper",
+    "role": "Cofounder and CEO, Every"
   },
   "Design Bootcamp - MCP For Designers": {
     "author": "Beth Gilleeney"
   },
   "Designing AI Interfaces (Notion)": {
     "author": "Vitaly Friedman"
+  },
+  "Eddie Kim - Gusto's CTO deleted everything and replaced it with Claude Code": {
+    "author": "Eddie Kim",
+    "role": "CTO, Gusto"
   },
   "Eric Ries - How Anthropic, Costco, and Patagonia all build incorruptible companies": {
     "author": "Eric Ries",
@@ -101,6 +121,18 @@
   "Evan Spiegel - How to win when software is not a moat": {
     "author": "Evan Spiegel",
     "role": "Co-founder & CEO, Snap"
+  },
+  "Every Staff - AI Is Ready. Organizations Aren't": {
+    "author": "Every Staff"
+  },
+  "Every Staff - Built on Moving Ground": {
+    "author": "Every Staff"
+  },
+  "Every Staff - Everyone Gets an Agent. Almost No One Gets the Model": {
+    "author": "Every Staff"
+  },
+  "Every Staff - Fable, Disabled": {
+    "author": "Every Staff"
   },
   "Figma - Designing in code": {
     "author": "Figma"
@@ -227,12 +259,48 @@
     "author": "Katarina Batina",
     "role": "VP of Design, Shopify"
   },
+  "Katie Parrott - Can AI Learn Good Judgment": {
+    "author": "Katie Parrott",
+    "role": "Staff Writer, Every"
+  },
+  "Katie Parrott - I Asked an AI to Audit My Own Career": {
+    "author": "Katie Parrott",
+    "role": "Staff Writer, Every"
+  },
+  "Katie Parrott - My Editor Caught Me Sounding Like AI. Now AI Catches Me First": {
+    "author": "Katie Parrott",
+    "role": "Staff Writer, Every"
+  },
   "Keith Rabois - Hard truths about building in the AI era": {
     "author": "Keith Rabois",
     "role": "Managing Director, Khosla Ventures"
   },
   "Large Language Models explained briefly (3Blue1Brown)": {
     "author": "Grant Sanderson (3Blue1Brown)"
+  },
+  "Laura Entis - AI Everywhere, All at Once": {
+    "author": "Laura Entis",
+    "role": "Staff Writer, Every"
+  },
+  "Laura Entis - Codex for Everything and Everyone": {
+    "author": "Laura Entis",
+    "role": "Staff Writer, Every"
+  },
+  "Laura Entis - How Anthropic Makes Claude More Reliable": {
+    "author": "Laura Entis",
+    "role": "Staff Writer, Every"
+  },
+  "Laura Entis - How to Get the Most Out of Fable 5": {
+    "author": "Laura Entis",
+    "role": "Staff Writer, Every"
+  },
+  "Laura Entis - Loops for Non-coders": {
+    "author": "Laura Entis",
+    "role": "Staff Writer, Every"
+  },
+  "Laura Entis - Token Tightening": {
+    "author": "Laura Entis",
+    "role": "Staff Writer, Every"
   },
   "Learn Prompting - Introduction": {
     "author": "Learn Prompting (Sander Schulhoff)"
@@ -315,12 +383,24 @@
   "Microsoft - How Large Language Models Work": {
     "author": "Andreas Stöffelbauer"
   },
+  "Mike Taylor - AI Could Do Anything. Then It Met PowerPoint": {
+    "author": "Mike Taylor",
+    "role": "Head of tech consulting, Every"
+  },
+  "Mike Taylor - I Interviewed an AI Version of GitHub's COO—Then Spoke to the Real One": {
+    "author": "Mike Taylor",
+    "role": "Head of tech consulting, Every"
+  },
   "Newline - MCP Explained": {
     "author": "Maksym Mitusov"
   },
   "Nikhyl Singhal - Why half of product managers are in trouble": {
     "author": "Nikhyl Singhal",
     "role": "Founder, The Skip; ex-VP Product, Meta"
+  },
+  "Nityesh Agarwal - Claude Code Is the OpenClaw Alternative You Already Have": {
+    "author": "Nityesh Agarwal",
+    "role": "Senior Applied AI Engineer, Every Consulting"
   },
   "No hype Claude Opus 4.8 review—my real experience": {
     "author": "Claire Vo",
@@ -379,6 +459,10 @@
   "Spec-driven development - the AI engineering workflow at Notion - Ryan Nystrom": {
     "author": "Ryan Nystrom",
     "role": "Engineering Manager, Notion"
+  },
+  "Stella Garber - We Built Our Own Agent-native Tool. It Overhauled How We Build Software": {
+    "author": "Stella Garber",
+    "role": "Co-founder and CEO, Hoop"
   },
   "Teo Connor - Scaling taste, craft, and quality in the AI era": {
     "author": "Teo Connor",

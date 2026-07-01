@@ -34,6 +34,15 @@
 > "When we surrender our consideration, we get polish on the surface, but something far less meaningful under the hood."
 > — [[Figma - Figma deep dive - Agentic workflows and the MCP]]
 
+> "The implementation is actually not the expensive part anymore. It's, dare I say, taste."
+> — [[Andrew Ambrosino - OpenAI Codex lead on taste, curation, and building for AGI]]
+
+> "There's an amount of novelty that is more important in design than it actually is in software engineering... in design there's an element of randomness here, and novelty."
+> — [[Andrew Ambrosino - OpenAI Codex lead on taste, curation, and building for AGI]]
+
+> "Matching an existing design and writing style is a hard task for AI because it requires spatial awareness, narrative structure, research diligence, design aesthetics, and good taste—all domains where humans still have the edge."
+> — [[Mike Taylor - AI Could Do Anything. Then It Met PowerPoint]]
+
 
 ## The last mile is ours
 
@@ -57,6 +66,12 @@
 
 > "AI is really great at building stuff that looks polished but it's full of holes and that kind of feedback is so important to get early on."
 > — [[Figma - Designing in code]]
+
+> "The truth is that the hard part of creating decks was never pushing pixels, but having something worth presenting. That's where you and I are still needed."
+> — [[Mike Taylor - AI Could Do Anything. Then It Met PowerPoint]]
+
+> "AI adoption isn’t being held back by the models—it’s the organization."
+> — [[Every Staff - AI Is Ready. Organizations Aren't]]
 
 
 ## Direct it, don't expect it to design
@@ -163,6 +178,12 @@
 > "AI accelerates execution, not clarity. If anything, AI can get in the way of clarity."
 > — [[Figma - Figma deep dive - Agentic workflows and the MCP]]
 
+> "If implementation is abundant, then it's really important to pick the right format for the point you're trying to make. If that point is product clarity around a vague area, then it might actually be a document. If what you're trying to do is get something in people's hands to try out and to stress test an interaction pattern, it's a prototype."
+> — [[Andrew Ambrosino - OpenAI Codex lead on taste, curation, and building for AGI]]
+
+> "I find that AI is so deferential and it just defaults to doing what you want it to do, but I actually want mine to challenge me."
+> — [[Eddie Kim - Gusto's CTO deleted everything and replaced it with Claude Code]]
+
 
 ## The job is being remade
 
@@ -232,6 +253,9 @@
 > "the kind of people who embrace the adventure are those that thrive in ambitious times like we're in now."
 > — [[Teo Connor - Scaling taste, craft, and quality in the AI era]]
 
+> "But that process still requires a human to provide the goal. LLMs do not have intrinsic motivation, the drive for exploration, or the ability to abruptly change its mind about what its goal is in the first place."
+> — [[Katie Parrott - Can AI Learn Good Judgment]]
+
 
 ## Powerful tools, unreliable hands
 
@@ -243,6 +267,9 @@
 
 > "Like humans, agents make mistakes (hallucinate) and operate within 'cognitive' limits (context windows). Humans have long mastered the art of building reliable systems from fallible human logic using sophisticated processes and methods like iterating, pairing, reviewing, testing and so forth."
 > — [[Thoughtworks - Preparing your team for the agentic SDLC]]
+
+> "An AI-generated deck that's 80 percent right is often worse than one using no AI at all. Reviewing a polished-looking presentation for hidden errors is harder than building the right one yourself, and people over-trust AI outputs."
+> — [[Mike Taylor - AI Could Do Anything. Then It Met PowerPoint]]
 
 
 ## Augment, don't replace
@@ -259,6 +286,9 @@
 > "the most helpful and supportive of AI collaborator is one that can actually do the stuff that maybe you don't like, and so you can focus on things you care about the most. And that's a different thing for basically everybody, and we all have a unique relationship with that work."
 > — [[Figma - Figma deep dive - Agents]]
 
+> "In our experience, automating things with AI causes more work, not less, because now you can pitch five times more prospects or deliver four workshops in a week instead of two."
+> — [[Mike Taylor - AI Could Do Anything. Then It Met PowerPoint]]
+
 
 ## Shifting, not collapsing
 
@@ -270,6 +300,9 @@
 
 > "a lot of things have changed, but the fundamentals haven't changed. Because we're still making sure that we are serving our users, that we understand their workflows... We still care about craft."
 > — [[Sheta Chatterjee - The UX of Gemini Enterprise]]
+
+> "Part of the danger in eliminating the concept of roles is that it can dangerously eliminate the idea that things are specialties with knowable best practices."
+> — [[Andrew Ambrosino - OpenAI Codex lead on taste, curation, and building for AGI]]
 
 
 ## Quiet AI beats the magic text box
