@@ -237,10 +237,19 @@ def copy_text(quote, source_meta):
     return line
 
 
+def search_text(quote, source_meta):
+    """Lowercased haystack for live search: quote body + author name."""
+    meta = source_meta.get(quote["raw"], {})
+    author = meta.get("author") or quote["author"]
+    return (strip_quotes(quote["text"]) + " " + author).lower().strip()
+
+
 def render_card(quote, sources, source_meta):
     """One self-contained quote card: quote glyph + copy button + quote + byline."""
     return (
-        f'      <figure class="quote" data-copy="{html.escape(copy_text(quote, source_meta), quote=True)}">\n'
+        f'      <figure class="quote" data-copy="{html.escape(copy_text(quote, source_meta), quote=True)}"'
+        f' data-theme="{html.escape(quote.get("theme", ""), quote=True)}"'
+        f' data-search="{html.escape(search_text(quote, source_meta), quote=True)}">\n'
         f'        <div class="card-top">\n'
         f'          <span class="qmark" aria-hidden="true">&ldquo;</span>\n'
         f"        </div>\n"
@@ -283,9 +292,21 @@ def render_byline(quote, sources, source_meta):
     return f'<figcaption class="source">{inner}</figcaption>'
 
 
+def ordered_themes(quotes):
+    """Unique non-empty themes in first-seen (document) order."""
+    seen, out = set(), []
+    for q in quotes:
+        t = q.get("theme", "")
+        if t and t not in seen:
+            seen.add(t)
+            out.append(t)
+    return out
+
+
 def render(quotes, sources, source_meta):
     cards = "\n".join(render_card(quote, sources, source_meta) for quote in quotes)
-    return TEMPLATE.format(body=cards)
+    themes_json = json.dumps(ordered_themes(quotes), ensure_ascii=False)
+    return TEMPLATE.format(body=cards, themes=themes_json)
 
 
 TEMPLATE = """<!doctype html>
@@ -523,6 +544,7 @@ TEMPLATE = """<!doctype html>
   <main id="field">
 {body}
   </main>
+  <script>window.__THEMES__ = {themes};</script>
   <script>
   (function () {{
     // Copy-to-clipboard, wired at document level via delegation so it covers
