@@ -524,6 +524,45 @@ TEMPLATE = """<!doctype html>
     z-index: 5;
   }}
 
+  #dock {{
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    background: var(--ink);
+    color: var(--bg);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    box-shadow: 0 12px 34px -10px rgba(0, 0, 0, 0.55);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+  }}
+  .dock-btn {{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--bg);
+    font: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+  }}
+  .dock-btn:hover {{ background: rgba(255, 255, 255, 0.12); }}
+  .dock-btn.on {{ background: var(--bg); color: var(--ink); }}
+  .dock-sep {{ width: 1px; height: 16px; background: rgba(255, 255, 255, 0.18); }}
+  /* Dark mode: charcoal dock on a near-black bg needs a hairline to separate. */
+  @media (prefers-color-scheme: dark) {{
+    #dock {{ border-color: var(--rule); }}
+  }}
+
   @media (prefers-reduced-motion: reduce) {{
     body.canvas #world .quote {{ transition: none; }}
   }}
@@ -715,6 +754,30 @@ TEMPLATE = """<!doctype html>
 
     document.body.appendChild(viewport);
     document.body.classList.add("canvas");
+
+    // --- Dock: floating Search / Themes / Shuffle control ---------------------
+    var themes = Array.isArray(window.__THEMES__) ? window.__THEMES__ : [];
+    var dock = document.createElement("div");
+    dock.id = "dock";
+    var searchBtn = document.createElement("button");
+    searchBtn.type = "button";
+    searchBtn.className = "dock-btn";
+    searchBtn.innerHTML = "🔍 Search";
+    var themesBtn = document.createElement("button");
+    themesBtn.type = "button";
+    themesBtn.className = "dock-btn";
+    themesBtn.innerHTML = "✦ Themes";
+    var shuffleBtn = document.createElement("button");
+    shuffleBtn.type = "button";
+    shuffleBtn.className = "dock-btn";
+    shuffleBtn.setAttribute("aria-label", "Shuffle");
+    shuffleBtn.textContent = "🎲";
+    function sep() {{ var s = document.createElement("span"); s.className = "dock-sep"; return s; }}
+    dock.appendChild(searchBtn); dock.appendChild(sep());
+    dock.appendChild(themesBtn); dock.appendChild(sep());
+    dock.appendChild(shuffleBtn);
+    document.body.appendChild(dock);
+
     layout();
     tx = -rnd() * TILE_W;
     ty = -rnd() * (columns.length ? columns[0].hk : 600);
