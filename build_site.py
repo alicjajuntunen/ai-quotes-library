@@ -794,6 +794,11 @@ TEMPLATE = """<!doctype html>
 
     // Recompute the visible subset and relayout. Called by every dock control.
     function applyFilter() {{
+      // Drop any in-flight glide/spring so a filter change starts from rest
+      // instead of carrying stale velocity or a stale spring target into the
+      // rebuilt layout.
+      if (raf) {{ cancelAnimationFrame(raf); raf = 0; }}
+      prevFrame = 0;
       layout();
       if (finite) {{
         tx = MARGIN; ty = MARGIN;   // land at the block's top-left with breathing room
@@ -801,6 +806,7 @@ TEMPLATE = """<!doctype html>
         apply();
       }} else {{
         rnd = mulberry32(seed);
+        committed = false; vx = vy = 0;
         centerNow();
         apply();
       }}
@@ -933,7 +939,7 @@ TEMPLATE = """<!doctype html>
         var dspeed = Math.sqrt(vx * vx + vy * vy);
         var gate = Math.max(0, 1 - dspeed / DRAG_V);
         var kEff = (1 - Math.pow(1 - DRAG_PULL, frames)) * gate * gate;
-        if (kEff > 0) {{ var nd = nearest(); tx += nd.dx * kEff; ty += nd.dy * kEff; }}
+        if (!finite && kEff > 0) {{ var nd = nearest(); tx += nd.dx * kEff; ty += nd.dy * kEff; }}
         if (finite) {{
           var r = panRange();
           tx = clampSoft(tx, r.minX, r.maxX, 0.5);
@@ -945,8 +951,10 @@ TEMPLATE = """<!doctype html>
       }}
 
       if (finite) {{
-        // Free glide, then a spring that pulls any out-of-range axis back to bound.
-        tx += vx * dt; ty += vy * dt;
+        // Momentum decay, a spring that pulls any out-of-range axis back to
+        // bound, then a SINGLE position integration — matching the committed
+        // branch below. Integrating before and after the spring (as an earlier
+        // version did) doubles the per-frame step and overshoots the boundary.
         var md2 = Math.pow(MOM_DECAY, frames);
         vx *= md2; vy *= md2;
         var r2 = panRange();
@@ -959,7 +967,11 @@ TEMPLATE = """<!doctype html>
         }}
         tx += vx * dt; ty += vy * dt;
         apply();
-        if (Math.abs(ox) < 0.3 && Math.abs(oy) < 0.3 &&
+        // Converged when in-bounds and nearly stopped — measured on the final
+        // (post-integration) position, not the pre-step offset.
+        var fx = tx - Math.min(r2.maxX, Math.max(r2.minX, tx));
+        var fy = ty - Math.min(r2.maxY, Math.max(r2.minY, ty));
+        if (Math.abs(fx) < 0.3 && Math.abs(fy) < 0.3 &&
             Math.sqrt(vx * vx + vy * vy) < 4) {{ raf = 0; prevFrame = 0; return; }}
         raf = requestAnimationFrame(tick);
         return;
