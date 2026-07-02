@@ -818,6 +818,40 @@ TEMPLATE = """<!doctype html>
       var active = visibleCards();
       finite = filtered();
       var colW = cardWidth();
+
+      // Finite (filtered/search) mode: one long horizontal row. Every match sits
+      // side by side, each card vertically centred on a shared midline so the
+      // variable heights read as a single band across the middle of the screen.
+      if (finite) {{
+        var maxH = 0;
+        for (var fk = 0; fk < active.length; fk++) {{
+          active[fk].style.width = colW + "px";
+          maxH = Math.max(maxH, active[fk].offsetHeight);
+        }}
+        for (var fi = 0; fi < active.length; fi++) {{
+          var fh = active[fi].offsetHeight;
+          var fx = fi * (colW + GUTTER);
+          var fcol = document.createElement("div");
+          fcol.className = "col";
+          fcol.style.position = "absolute";
+          fcol.style.top = "0";
+          fcol.style.left = fx + "px";
+          fcol.style.width = colW + "px";
+          fcol.style.willChange = "transform";
+          var fclone = active[fi].cloneNode(true);
+          fclone.style.width = colW + "px";
+          fclone.style.left = "0";
+          fclone.style.top = ((maxH - fh) / 2) + "px";  // centre this card in the band
+          fcol.appendChild(fclone);
+          world.appendChild(fcol);
+          columns.push({{ hk: maxH, els: [fcol] }});
+          centers.push({{ cx: fx + colW / 2, cy: maxH / 2, hk: maxH }});
+        }}
+        boundW = active.length ? active.length * (colW + GUTTER) - GUTTER : 0;
+        boundH = maxH;
+        return;
+      }}
+
       var colCount = Math.max(3, Math.min(6, Math.round(Math.sqrt(Math.max(1, active.length)))));
       TILE_W = colCount * (colW + GUTTER);
 
@@ -867,11 +901,6 @@ TEMPLATE = """<!doctype html>
         }}
         columns.push({{ hk: hk, els: els }});
       }}
-      if (finite) {{
-        boundW = colCount * (colW + GUTTER) - GUTTER;
-        boundH = 0;
-        for (var bi = 0; bi < colH.length; bi++) boundH = Math.max(boundH, colH[bi] - GUTTER);
-      }}
     }}
 
     function wrap(v, m) {{ var w = v % m; if (w > 0) w -= m; return w; }}
@@ -907,12 +936,22 @@ TEMPLATE = """<!doctype html>
     }}
     function centerNow() {{ var n = nearest(); tx += n.dx; ty += n.dy; }}
 
-    // Finite mode: allowed pan range so the block stays reachable but bounded.
+    // Finite mode: the row's resting home — centred on both axes. When it
+    // overflows an axis this centre still sits inside the pan range (below), so
+    // the middle of the row shows first and you drag either way to the ends.
+    function finiteHome() {{
+      return {{ tx: (window.innerWidth - boundW) / 2, ty: (window.innerHeight - boundH) / 2 }};
+    }}
+    // Finite mode: allowed pan range. An axis that fits locks to its centre; an
+    // axis that overflows pans between its two ends (each reachable with MARGIN).
     function panRange() {{
       var vw = window.innerWidth, vh = window.innerHeight;
-      var minX = Math.min(0, vw - boundW - MARGIN * 2);
-      var minY = Math.min(0, vh - boundH - MARGIN * 2);
-      return {{ minX: minX, maxX: 0, minY: minY, maxY: 0 }};
+      var rx, ry;
+      if (boundW <= vw - MARGIN * 2) {{ var cx = (vw - boundW) / 2; rx = [cx, cx]; }}
+      else rx = [vw - MARGIN - boundW, MARGIN];
+      if (boundH <= vh - MARGIN * 2) {{ var cy = (vh - boundH) / 2; ry = [cy, cy]; }}
+      else ry = [vh - MARGIN - boundH, MARGIN];
+      return {{ minX: rx[0], maxX: rx[1], minY: ry[0], maxY: ry[1] }};
     }}
     // Pull an out-of-range value back toward [lo, hi]; k controls softness.
     function clampSoft(v, lo, hi, k) {{
@@ -992,7 +1031,8 @@ TEMPLATE = """<!doctype html>
       layout();
       emptyNote.hidden = !(finite && visibleCards().length === 0);
       if (finite) {{
-        tx = MARGIN; ty = MARGIN;   // land at the block's top-left with breathing room
+        var fhome = finiteHome();    // land centred; the row is the middle band
+        tx = fhome.tx; ty = fhome.ty;
         committed = false; vx = vy = 0;
         apply();
       }} else {{
@@ -1164,7 +1204,7 @@ TEMPLATE = """<!doctype html>
     if (document.fonts && document.fonts.ready) {{
       document.fonts.ready.then(function () {{
         layout();
-        if (finite) {{ tx = MARGIN; ty = MARGIN; }}
+        if (finite) {{ var fh2 = finiteHome(); tx = fh2.tx; ty = fh2.ty; }}
         else if (!dragging && !raf) centerNow();
         apply();
       }});
@@ -1336,7 +1376,7 @@ TEMPLATE = """<!doctype html>
       rt = setTimeout(function () {{
         rnd = mulberry32(seed);
         layout();
-        if (finite) {{ tx = MARGIN; ty = MARGIN; }}
+        if (finite) {{ var fh3 = finiteHome(); tx = fh3.tx; ty = fh3.ty; }}
         else if (!dragging && !raf) centerNow();
         apply();
       }}, 200);
