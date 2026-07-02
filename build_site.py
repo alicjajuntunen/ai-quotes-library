@@ -616,11 +616,18 @@ TEMPLATE = """<!doctype html>
     transition: opacity 0.28s ease, transform 0.28s ease,
       background 0.18s ease, color 0.18s ease;
   }}
-  /* Staggered rise-in when the tray opens; pills exit together (no delay). */
+  /* Staggered rise-in when the tray opens: pills land one after another. The
+     per-pill delay (--d, in ms, precomputed in JS) uses a shrinking gap — wide
+     at the start so the first few read as distinctly one-by-one, then closing
+     up so the tail catches up and the whole reveal stays snappy. Pills exit
+     together (no delay). */
   #theme-pills.open .theme-pill {{
     opacity: 1;
     transform: none;
-    transition-delay: calc(var(--i, 0) * 22ms);
+    /* Delay ONLY the rise-in (opacity, transform) — matching the transition
+       property order above. background/color get 0s so selecting a pill inverts
+       its colours instantly instead of waiting out its stagger delay. */
+    transition-delay: calc(var(--d, 0) * 1ms), calc(var(--d, 0) * 1ms), 0s, 0s;
   }}
   /* Selection is shown by the color inversion alone — keep the italic serif and
      weight identical to the unselected state so the pill's width never changes
@@ -1089,7 +1096,12 @@ TEMPLATE = """<!doctype html>
       p.className = "theme-pill";
       p.textContent = name;
       p.dataset.name = name;  // compared in syncThemePills — independent of the label markup
-      p.style.setProperty("--i", i);  // per-pill stagger index for the rise-in
+      // Cumulative rise-in delay with a shrinking gap: gap_k = GAP0 * DECAY^k, so
+      // delay(i) = GAP0 * (1 - DECAY^i) / (1 - DECAY). Early pills are spaced wide
+      // (distinctly one-by-one); the gap decays toward zero so the tail catches up
+      // and the whole cascade tops out fast (~GAP0/(1-DECAY) ms) no matter how many.
+      var GAP0 = 50, DECAY = 0.82;
+      p.style.setProperty("--d", Math.round(GAP0 * (1 - Math.pow(DECAY, i)) / (1 - DECAY)));
       p.addEventListener("click", function () {{
         if (filter.theme === name) {{ filter.theme = null; }}  // re-click clears
         else {{ filter.theme = name; }}
