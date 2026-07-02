@@ -899,6 +899,63 @@ TEMPLATE = """<!doctype html>
       return v;
     }}
 
+    // FLIP animation across a filter change. layout() rebuilds #world from
+    // scratch, so we can't tween the same nodes; instead we snapshot on-screen
+    // card positions by quote key (data-search) BEFORE the relayout, then after
+    // it slide each surviving card from its old screen spot to the new one and
+    // fade+rise the newcomers. Cards filtered *out* are already gone — the
+    // survivors' motion covers their absence.
+    var FLIP_MS = 460, FLIP_PAD = 60;
+    function onScreen(r, vh, vw) {{
+      return r.bottom > -FLIP_PAD && r.top < vh + FLIP_PAD &&
+             r.right > -FLIP_PAD && r.left < vw + FLIP_PAD;
+    }}
+    function snapshotRects() {{
+      var map = {{}};
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var els = world.querySelectorAll(".quote");
+      for (var i = 0; i < els.length; i++) {{
+        var r = els[i].getBoundingClientRect();
+        if (!onScreen(r, vh, vw)) continue;
+        var key = els[i].getAttribute("data-search");
+        // Keep the instance nearest viewport centre per key (infinite mode tiles
+        // multiple clones of each quote); survivors then travel the least.
+        var cx = r.left + r.width / 2 - vw / 2, cy = r.top + r.height / 2 - vh / 2;
+        var d = cx * cx + cy * cy;
+        if (!map[key] || d < map[key].d) map[key] = {{ left: r.left, top: r.top, d: d }};
+      }}
+      return map;
+    }}
+    function playFlip(oldRects) {{
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var els = world.querySelectorAll(".quote");
+      var anim = [];
+      for (var i = 0; i < els.length; i++) {{
+        var el = els[i];
+        var r = el.getBoundingClientRect();
+        if (!onScreen(r, vh, vw)) continue;
+        var old = oldRects[el.getAttribute("data-search")];
+        el.style.transition = "none";
+        if (old) {{
+          el.style.transform = "translate(" + (old.left - r.left) + "px," + (old.top - r.top) + "px)";
+        }} else {{
+          el.style.transform = "translateY(16px)";
+          el.style.opacity = "0";
+        }}
+        anim.push(el);
+      }}
+      void world.offsetWidth;  // flush the inverted start state before playing
+      anim.forEach(function (e) {{
+        e.style.transition = "transform " + FLIP_MS + "ms cubic-bezier(0.22, 0.61, 0.36, 1), " +
+          "opacity " + FLIP_MS + "ms ease";
+        e.style.transform = "";
+        e.style.opacity = "";
+        window.setTimeout(function () {{
+          e.style.transition = ""; e.style.transform = ""; e.style.opacity = "";
+        }}, FLIP_MS + FLIP_PAD);
+      }});
+    }}
+
     // Recompute the visible subset and relayout. Called by every dock control.
     function applyFilter() {{
       // Drop any in-flight glide/spring so a filter change starts from rest
@@ -906,6 +963,7 @@ TEMPLATE = """<!doctype html>
       // rebuilt layout.
       if (raf) {{ cancelAnimationFrame(raf); raf = 0; }}
       prevFrame = 0;
+      var oldRects = reduce ? null : snapshotRects();  // measure BEFORE relayout
       layout();
       emptyNote.hidden = !(finite && visibleCards().length === 0);
       if (finite) {{
@@ -918,6 +976,7 @@ TEMPLATE = """<!doctype html>
         centerNow();
         apply();
       }}
+      if (oldRects) playFlip(oldRects);  // slide survivors, fade+rise newcomers
     }}
 
     document.body.appendChild(viewport);
