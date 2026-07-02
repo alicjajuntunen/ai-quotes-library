@@ -1101,7 +1101,7 @@ TEMPLATE = """<!doctype html>
     }});
 
     // Shuffle cancels any active filter, returns to the infinite field, and
-    // springs to a random quote.
+    // glides to a random quote.
     shuffleBtn.addEventListener("click", function () {{
       filter.query = ""; filter.theme = null;
       emptyNote.hidden = true;  // shuffle bypasses applyFilter, so clear the note by hand
@@ -1111,11 +1111,25 @@ TEMPLATE = """<!doctype html>
       if (raf) {{ cancelAnimationFrame(raf); raf = 0; }}
       prevFrame = 0;
       layout();
-      tx = -rnd() * TILE_W;
-      ty = -rnd() * (columns.length ? columns[0].hk : 600);
-      centerNow();
-      committed = false; vx = vy = 0;
-      if (!reduce) startLoop(); else apply();
+      // Pick a random quote and centre a copy of it. `ox`/`oy` is the offset to
+      // its nearest copy; we then push the target one whole tile further (a
+      // horizontal tile always, a column-height sometimes) so the field visibly
+      // travels there instead of teleporting.
+      var c = centers[Math.floor(rnd() * centers.length)] || {{ cx: 0, cy: 0, hk: 600 }};
+      var cxv = window.innerWidth / 2, cyv = window.innerHeight / 2;
+      var ox = modc(c.cx + tx - cxv, TILE_W);
+      var oy = modc(c.cy + ty - cyv, c.hk);
+      if (reduce) {{
+        tx -= ox; ty -= oy;               // land instantly, no travel
+        committed = false; vx = vy = 0; apply();
+      }} else {{
+        var hSign = rnd() < 0.5 ? -1 : 1;
+        var vSign = rnd() < 0.5 ? -1 : 1;
+        targetTx = tx - ox + TILE_W * hSign;
+        targetTy = ty - oy + c.hk * vSign * Math.floor(rnd() * 2);
+        committed = true; vx = vy = 0;     // spring straight to the target quote
+        startLoop();
+      }}
     }});
 
     layout();
