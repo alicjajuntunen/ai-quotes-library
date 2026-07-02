@@ -554,6 +554,9 @@ TEMPLATE = """<!doctype html>
     font: inherit;
     cursor: pointer;
     white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.22s ease, max-width 0.28s ease, padding 0.22s ease,
+      background 0.18s ease, color 0.18s ease;
   }}
   .dock-btn:hover {{ background: rgba(255, 255, 255, 0.12); }}
   .dock-btn.on {{ background: var(--bg); color: var(--ink); }}
@@ -572,8 +575,11 @@ TEMPLATE = """<!doctype html>
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
   }}
-  #theme-pills[hidden] {{ display: none; }}
+  #theme-pills.open {{ opacity: 1; pointer-events: auto; }}
   .theme-pill {{
     padding: 7px 14px;
     border: none;
@@ -586,8 +592,19 @@ TEMPLATE = """<!doctype html>
     cursor: pointer;
     box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.28s ease, transform 0.28s ease,
+      background 0.18s ease, color 0.18s ease;
+  }}
+  /* Staggered rise-in when the tray opens; pills exit together (no delay). */
+  #theme-pills.open .theme-pill {{
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(var(--i, 0) * 22ms);
   }}
   .theme-pill.on {{ background: var(--bg); color: var(--ink); font-style: normal; font-weight: 500; }}
+  #dock .dock-sep {{ transition: opacity 0.2s ease; }}
   #dock.searching .dock-sep {{ opacity: 0.35; }}
   #dock.searching #themes-btn,
   #dock.searching #shuffle-btn {{
@@ -595,16 +612,35 @@ TEMPLATE = """<!doctype html>
     padding-left: 6px;
     padding-right: 6px;
   }}
+  /* Search morph: the button collapses to nothing while the field grows out of
+     the same spot, so the two cross-fade in place instead of snapping. */
+  #search-btn {{ max-width: 160px; }}
+  #dock.searching #search-btn {{
+    max-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    opacity: 0;
+    pointer-events: none;
+  }}
   #dock-search {{
-    display: none;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 12px;
+    max-width: 0;
+    padding: 6px 0;
+    opacity: 0;
+    overflow: hidden;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.14);
+    pointer-events: none;
+    transition: max-width 0.3s ease, opacity 0.24s ease, padding 0.24s ease;
   }}
-  #dock.searching #dock-search {{ display: inline-flex; }}
-  #dock.searching #search-btn {{ display: none; }}
+  #dock.searching #dock-search {{
+    max-width: 240px;
+    padding: 6px 12px;
+    opacity: 1;
+    pointer-events: auto;
+  }}
   #dock-search input {{
     border: none;
     background: transparent;
@@ -634,6 +670,8 @@ TEMPLATE = """<!doctype html>
 
   @media (prefers-reduced-motion: reduce) {{
     body.canvas #world .quote {{ transition: none; }}
+    .dock-btn, #dock-search, #theme-pills, .theme-pill {{ transition: none; }}
+    #theme-pills.open .theme-pill {{ transition-delay: 0s; }}
   }}
 
   @media (prefers-color-scheme: dark) {{
@@ -920,13 +958,14 @@ TEMPLATE = """<!doctype html>
     // Theme pills float above the dock; single-select.
     var pills = document.createElement("div");
     pills.id = "theme-pills";
-    pills.hidden = true;
-    themes.forEach(function (name) {{
+    pills.inert = true;  // closed: not focusable/clickable (visible state is the .open class)
+    themes.forEach(function (name, i) {{
       var p = document.createElement("button");
       p.type = "button";
       p.className = "theme-pill";
       p.textContent = name;
       p.dataset.name = name;  // compared in syncThemePills — independent of the label markup
+      p.style.setProperty("--i", i);  // per-pill stagger index for the rise-in
       p.addEventListener("click", function () {{
         if (filter.theme === name) {{ filter.theme = null; }}  // re-click clears
         else {{ filter.theme = name; }}
@@ -948,13 +987,13 @@ TEMPLATE = """<!doctype html>
       for (var i = 0; i < kids.length; i++) {{
         kids[i].classList.toggle("on", kids[i].dataset.name === filter.theme);
       }}
-      themesBtn.classList.toggle("on", !pills.hidden || !!filter.theme);
+      themesBtn.classList.toggle("on", pills.classList.contains("open") || !!filter.theme);
     }}
 
-    function openThemes() {{ pills.hidden = false; syncThemePills(); }}
-    function closeThemes() {{ pills.hidden = true; syncThemePills(); }}
+    function openThemes() {{ pills.classList.add("open"); pills.inert = false; syncThemePills(); }}
+    function closeThemes() {{ pills.classList.remove("open"); pills.inert = true; syncThemePills(); }}
     themesBtn.addEventListener("click", function () {{
-      if (pills.hidden) {{
+      if (!pills.classList.contains("open")) {{
         if (dock.classList.contains("searching")) closeSearch();
         openThemes();
       }} else {{
