@@ -603,7 +603,10 @@ TEMPLATE = """<!doctype html>
     transform: none;
     transition-delay: calc(var(--i, 0) * 22ms);
   }}
-  .theme-pill.on {{ background: var(--bg); color: var(--ink); font-style: normal; font-weight: 500; }}
+  /* Selection is shown by the color inversion alone — keep the italic serif and
+     weight identical to the unselected state so the pill's width never changes
+     and neighbours don't reflow when you click. */
+  .theme-pill.on {{ background: var(--bg); color: var(--ink); }}
   #dock .dock-sep {{ transition: opacity 0.2s ease; }}
   #dock.searching .dock-sep {{ opacity: 0.35; }}
   #dock.searching #themes-btn,
@@ -1111,25 +1114,21 @@ TEMPLATE = """<!doctype html>
       if (raf) {{ cancelAnimationFrame(raf); raf = 0; }}
       prevFrame = 0;
       layout();
-      // Pick a random quote and centre a copy of it. `ox`/`oy` is the offset to
-      // its nearest copy; we then push the target one whole tile further (a
-      // horizontal tile always, a column-height sometimes) so the field visibly
-      // travels there instead of teleporting.
-      var c = centers[Math.floor(rnd() * centers.length)] || {{ cx: 0, cy: 0, hk: 600 }};
-      var cxv = window.innerWidth / 2, cyv = window.innerHeight / 2;
-      var ox = modc(c.cx + tx - cxv, TILE_W);
-      var oy = modc(c.cy + ty - cyv, c.hk);
-      if (reduce) {{
-        tx -= ox; ty -= oy;               // land instantly, no travel
-        committed = false; vx = vy = 0; apply();
-      }} else {{
-        var hSign = rnd() < 0.5 ? -1 : 1;
-        var vSign = rnd() < 0.5 ? -1 : 1;
-        targetTx = tx - ox + TILE_W * hSign;
-        targetTy = ty - oy + c.hk * vSign * Math.floor(rnd() * 2);
-        committed = true; vx = vy = 0;     // spring straight to the target quote
-        startLoop();
-      }}
+      // A gentle random hop: pan the viewport by roughly half a screen, snap
+      // that destination onto its nearest quote, and spring there from the
+      // current position — enough motion to feel like a shuffle without a long
+      // journey across the field.
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var panX = (0.4 + rnd() * 0.5) * vw * (rnd() < 0.5 ? -1 : 1);
+      var panY = (0.25 + rnd() * 0.35) * vh * (rnd() < 0.5 ? -1 : 1);
+      var sx = tx, sy = ty;
+      tx += panX; ty += panY;
+      var n = nearest();                   // nearest quote to the destination
+      targetTx = tx + n.dx; targetTy = ty + n.dy;
+      tx = sx; ty = sy;                    // spring travels from where we are now
+      committed = true; vx = vy = 0;
+      if (reduce) {{ tx = targetTx; ty = targetTy; committed = false; apply(); }}
+      else startLoop();
     }});
 
     layout();
