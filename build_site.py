@@ -565,12 +565,15 @@ TEMPLATE = """<!doctype html>
   #theme-pills {{
     position: fixed;
     left: 50%;
-    bottom: 74px;
+    /* Clear the dock (its top edge is ~74px up) with a margin above it. */
+    bottom: 90px;
     transform: translateX(-50%);
     z-index: 19;
-    width: min(560px, 92vw);
-    max-height: calc(3 * 40px);
-    overflow: hidden;
+    /* Wide enough to spread every theme across at most three long rows;
+       scroll only kicks in if the themes ever outgrow three rows. */
+    width: min(960px, 94vw);
+    max-height: calc(3 * 34px + 2 * 8px);
+    overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -580,6 +583,22 @@ TEMPLATE = """<!doctype html>
     transition: opacity 0.2s ease;
   }}
   #theme-pills.open {{ opacity: 1; pointer-events: auto; }}
+  /* On narrow screens a stacked tray would swallow the whole screen, so keep
+     the themes on a single row that scrolls sideways instead. */
+  @media (max-width: 600px) {{
+    #theme-pills {{
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      max-height: none;
+      /* Room for the pill shadow (clipped by overflow) + edge breathing space. */
+      padding: 10px 14px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }}
+    #theme-pills::-webkit-scrollbar {{ display: none; }}
+  }}
   .theme-pill {{
     padding: 7px 14px;
     border: none;
