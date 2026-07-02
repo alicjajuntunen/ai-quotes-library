@@ -1076,6 +1076,10 @@ TEMPLATE = """<!doctype html>
 
     function openSearch() {{
       closeThemes();
+      // Mutual exclusion: opening Search drops any active theme filter (mirrors
+      // closeSearch clearing the query when Themes opens) so search runs over
+      // the whole library, not a leftover theme subset.
+      if (filter.theme) {{ filter.theme = null; syncThemePills(); applyFilter(); }}
       dock.classList.add("searching");
       searchInput.focus();
     }}
@@ -1100,6 +1104,7 @@ TEMPLATE = """<!doctype html>
     // springs to a random quote.
     shuffleBtn.addEventListener("click", function () {{
       filter.query = ""; filter.theme = null;
+      emptyNote.hidden = true;  // shuffle bypasses applyFilter, so clear the note by hand
       searchInput.value = "";
       dock.classList.remove("searching");
       closeThemes();
