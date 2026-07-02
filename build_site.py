@@ -905,7 +905,7 @@ TEMPLATE = """<!doctype html>
     // it slide each surviving card from its old screen spot to the new one and
     // fade+rise the newcomers. Cards filtered *out* are already gone — the
     // survivors' motion covers their absence.
-    var FLIP_MS = 460, FLIP_PAD = 60;
+    var FLIP_MS = 460, FLIP_PAD = 60, flipTimers = [];
     function onScreen(r, vh, vw) {{
       return r.bottom > -FLIP_PAD && r.top < vh + FLIP_PAD &&
              r.right > -FLIP_PAD && r.left < vw + FLIP_PAD;
@@ -927,6 +927,9 @@ TEMPLATE = """<!doctype html>
       return map;
     }}
     function playFlip(oldRects) {{
+      // Cancel any cleanup still pending from a previous FLIP so a rapid second
+      // filter change can't have stale timers clear styles out from under it.
+      while (flipTimers.length) clearTimeout(flipTimers.pop());
       var vw = window.innerWidth, vh = window.innerHeight;
       var els = world.querySelectorAll(".quote");
       var anim = [];
@@ -950,9 +953,9 @@ TEMPLATE = """<!doctype html>
           "opacity " + FLIP_MS + "ms ease";
         e.style.transform = "";
         e.style.opacity = "";
-        window.setTimeout(function () {{
+        flipTimers.push(window.setTimeout(function () {{
           e.style.transition = ""; e.style.transform = ""; e.style.opacity = "";
-        }}, FLIP_MS + FLIP_PAD);
+        }}, FLIP_MS + FLIP_PAD));
       }});
     }}
 
