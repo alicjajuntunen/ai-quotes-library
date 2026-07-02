@@ -612,8 +612,10 @@ TEMPLATE = """<!doctype html>
     box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
     opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.28s ease, transform 0.28s ease,
+    transform: translateY(16px);
+    /* Resting/exit easing: snappy, no overshoot. The springy enter curve is set
+       on the .open rule below so only the entrance bounces (exit stays crisp). */
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
       background 0.18s ease, color 0.18s ease;
   }}
   /* Staggered rise-in when the tray opens: pills land one after another. The
@@ -624,6 +626,13 @@ TEMPLATE = """<!doctype html>
   #theme-pills.open .theme-pill {{
     opacity: 1;
     transform: none;
+    /* Enter easing: a gentle overshoot (ease-out-back) on the transform gives a
+       tiny spring — the pill rises just past its resting spot and settles back —
+       matching the springier feel of the canvas motion. Opacity/colour stay on
+       plain easing so only the movement bounces. */
+    transition: opacity 0.3s ease,
+      transform 0.46s cubic-bezier(0.34, 1.5, 0.6, 1),
+      background 0.18s ease, color 0.18s ease;
     /* Delay ONLY the rise-in (opacity, transform) — matching the transition
        property order above. background/color get 0s so selecting a pill inverts
        its colours instantly instead of waiting out its stagger delay. */
@@ -700,7 +709,9 @@ TEMPLATE = """<!doctype html>
   @media (prefers-reduced-motion: reduce) {{
     body.canvas #world .quote {{ transition: none; }}
     .dock-btn, #dock-search, #theme-pills, .theme-pill {{ transition: none; }}
-    #theme-pills.open .theme-pill {{ transition-delay: 0s; }}
+    /* The .open rule sets its own (higher-specificity) transition, so it must be
+       neutralised here too or the spring would survive reduced-motion. */
+    #theme-pills.open .theme-pill {{ transition: none; transition-delay: 0s; }}
   }}
 
   @media (prefers-color-scheme: dark) {{
