@@ -1127,7 +1127,8 @@ TEMPLATE = """<!doctype html>
     if (document.fonts && document.fonts.ready) {{
       document.fonts.ready.then(function () {{
         layout();
-        if (!dragging && !raf) centerNow();
+        if (finite) {{ tx = MARGIN; ty = MARGIN; }}
+        else if (!dragging && !raf) centerNow();
         apply();
       }});
     }}
@@ -1187,8 +1188,14 @@ TEMPLATE = """<!doctype html>
       dragging = false;
       viewport.classList.remove("grabbing");
       try {{ viewport.releasePointerCapture(e.pointerId); }} catch (_) {{}}
-      if (reduce) {{ centerNow(); apply(); }}  // reduced motion: settle instantly
-      else startLoop();
+      if (reduce) {{  // reduced motion: settle instantly, mode-appropriately
+        if (finite) {{
+          var r = panRange();
+          tx = Math.min(r.maxX, Math.max(r.minX, tx));
+          ty = Math.min(r.maxY, Math.max(r.minY, ty));
+        }} else centerNow();
+        apply();
+      }} else startLoop();
     }}
     viewport.addEventListener("pointerup", endDrag);
     viewport.addEventListener("pointercancel", endDrag);
@@ -1292,7 +1299,8 @@ TEMPLATE = """<!doctype html>
       rt = setTimeout(function () {{
         rnd = mulberry32(seed);
         layout();
-        if (!dragging && !raf) centerNow();
+        if (finite) {{ tx = MARGIN; ty = MARGIN; }}
+        else if (!dragging && !raf) centerNow();
         apply();
       }}, 200);
     }});
